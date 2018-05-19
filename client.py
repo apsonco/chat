@@ -18,7 +18,7 @@ import utils
 from config import *
 
 
-USER_NAME = 'My_first'
+TEST_USER_NAME = 'My_first'
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -30,7 +30,7 @@ sock = socket(AF_INET, SOCK_STREAM)
 # Create connection with server
 sock.connect(('localhost', 5335))
 # Create presence message
-message = utils.presence_message(USER_NAME)
+message = utils.presence_message(TEST_USER_NAME)
 # Send message to server
 utils.send_message(sock, message)
 # Receive server message
