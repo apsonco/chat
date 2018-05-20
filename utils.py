@@ -13,14 +13,20 @@ def dict_to_bytes(dict):
     return result
 
 
+def dict_from_bytes(byte_str):
+    result = byte_str.decode(CHARACTER_ENCODING)
+    result = json.loads(result)
+    return result
+
+
 def send_message(web_socket, dict_message):
     result = dict_to_bytes(dict_message)
     web_socket.send(result)
 
 
 def get_message(web_socket):
-    str = web_socket.recv(1024).decode(CHARACTER_ENCODING)
-    result = json.loads(str)
+    byte_str = web_socket.recv(1024)
+    result = dict_from_bytes(byte_str)
     return result
 
 
