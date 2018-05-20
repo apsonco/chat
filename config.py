@@ -24,3 +24,6 @@ STR_PRESENCE_RECEIVED = 'Presence received'
 STR_ONLINE = 'Hey! I am online'
 STR_ORDER_WITHOUT_PRESENCE = '''Server received order without 'presence' key '''
 STR_QUIT = 'Good bye!'
+
+DEFAULT_PORT = 5335
+DEFAULT_SERVER_IP_LISTENING_ADDRESS = ''
