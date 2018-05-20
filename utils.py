@@ -48,7 +48,7 @@ def presence_message(user_name):
     current_time = time.time()
     result = {KEY_ACTION: VALUE_PRESENCE,
               KEY_TIME: current_time,
-              KEY_TYPE: 'status',       # TODO: Should define and carry to config.py
+              KEY_TYPE: VALUE_STATUS_DEFAULT,
               KEY_USER: {
                   KEY_ACCOUNT_NAME: user_name,
                   KEY_STATUS: STR_ONLINE
@@ -62,12 +62,13 @@ def quit_message(user_name):
     current_time = time.time()
     result = {KEY_ACTION: VALUE_QUIT,
               KEY_TIME: current_time,
-              KEY_TYPE: 'status',       # TODO: Should define and carry to config.py
+              KEY_TYPE: VALUE_STATUS_DEFAULT,
               KEY_USER: {
                   KEY_ACCOUNT_NAME: user_name,
                   KEY_STATUS: STR_QUIT
               }}
     return result
+
 
 # Create error message
 def response_error(code, alert):

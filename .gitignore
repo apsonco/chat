@@ -1,10 +1,5 @@
 # .gitignore
 __pycache__
 .pytest_cache
-<<<<<<< HEAD
-.idea
-venv
-=======
->>>>>>> basic_tests
 .idea
 venv

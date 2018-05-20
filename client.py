@@ -8,7 +8,7 @@
 # - parse response message
 # Shell parameters client.py <address> [<port>]:
 # - address - server IP address
-# - port - server TCP port, 7777 by default
+# - port - server TCP port, 5335 by default
 
 import sys
 from socket import socket, AF_INET, SOCK_STREAM

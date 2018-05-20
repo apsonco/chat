@@ -1,14 +1,5 @@
 # test_utils.py
-<<<<<<< HEAD
-#
 # Python tests for utils.py
-
-import utils
-
-
-test_message_json = utils.dict_to_bytes()
-=======
-# Pytests for utils.py
 
 import json
 
@@ -38,4 +29,4 @@ class TestCoding:
         decoded_message = result_message.decode(config.CHARACTER_ENCODING)
         test_message = json.loads(decoded_message)
         assert origin_json == test_message
->>>>>>> basic_tests
+
