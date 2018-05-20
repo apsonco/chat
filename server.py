@@ -24,6 +24,7 @@ port = DEFAULT_PORT
 server_address = DEFAULT_SERVER_IP_LISTENING_ADDRESS
 
 # TODO: Edit code for working with console keys -address, -port
+# or find out library
 
 if len(sys.argv) > 1:
     # TODO: Create a function with code from 'else'
