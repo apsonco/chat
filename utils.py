@@ -8,8 +8,8 @@ import json
 from config import *
 
 
-def dict_to_bytes(dict):
-    result = json.dumps(dict).encode(CHARACTER_ENCODING)
+def dict_to_bytes(dict_message):
+    result = json.dumps(dict_message).encode(CHARACTER_ENCODING)
     return result
 
 
