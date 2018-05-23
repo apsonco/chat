@@ -56,6 +56,19 @@ def presence_message(user_name):
     return result
 
 
+# Create test message
+def test_message(message, user_to='Guest', user_from='Guest'):
+    current_time = time.time()
+    result = {KEY_ACTION: VALUE_MESSAGE,
+              KEY_TIME: current_time,
+              KEY_TO: user_to,
+              KEY_FROM: user_from,
+              KEY_ENCODING: CHARACTER_ENCODING,
+              KEY_MESSAGE: message
+              }
+    return result
+
+
 # Create quit message
 def quit_message(user_name):
     # Time in seconds since the epoch as a floating point number

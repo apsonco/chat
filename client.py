@@ -29,19 +29,28 @@ sock = socket(AF_INET, SOCK_STREAM)
 
 # Create connection with server
 sock.connect(('localhost', 5335))
-# Create presence message
-message = utils.presence_message(TEST_USER_NAME)
-# Send message to server
-utils.send_message(sock, message)
-# Receive server message
-serverMessage = utils.get_message(sock)
 
-# Parse response message
-code = serverMessage[KEY_RESPONSE]
-if code == HTTP_CODE_OK:
-    print(STR_PRESENCE_RECEIVED)
-elif code == HTTP_CODE_WRONG_ORDER:
-    print(STR_ORDER_WITHOUT_PRESENCE)
+while True:
+    # Receive server message
+    logging.info('Try get message from '.format(sock))
+    server_message = utils.get_message(sock)
+    message_type = server_message[KEY_ACTION]
+    if message_type == VALUE_MESSAGE:
+        print(server_message[KEY_MESSAGE])
+
+# # Create presence message
+# message = utils.presence_message(TEST_USER_NAME)
+# # Send message to server
+# utils.send_message(sock, message)
+# # Receive server message
+# serverMessage = utils.get_message(sock)
+#
+# # Parse response message
+# code = serverMessage[KEY_RESPONSE]
+# if code == HTTP_CODE_OK:
+#     print(STR_PRESENCE_RECEIVED)
+# elif code == HTTP_CODE_WRONG_ORDER:
+#     print(STR_ORDER_WITHOUT_PRESENCE)
 
 logging.info('Server response JSON : {}'.format(serverMessage))
 

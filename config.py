@@ -12,10 +12,15 @@ KEY_TYPE = 'type'
 KEY_USER = 'user'
 KEY_ACCOUNT_NAME = 'account_name'
 KEY_STATUS = 'status'
+KEY_TO = 'to'
+KEY_FROM = 'from'
+KEY_ENCODING = 'encoding'
+KEY_MESSAGE = 'message'
 
 VALUE_PRESENCE = 'presence'
 VALUE_QUIT = 'quit'
 VALUE_STATUS_DEFAULT = 'status'
+VALUE_MESSAGE = 'msg'
 
 HTTP_CODE_OK = 200
 HTTP_CODE_WRONG_ORDER = 400
