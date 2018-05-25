@@ -6,6 +6,8 @@ import json
 import utils
 import config
 
+import pytest
+
 
 # Test for dict_to_bytes function
 
@@ -51,3 +53,19 @@ class TestMessages:
         mess = utils.presence_message('test_user')
         assert config.KEY_ACTION in mess and config.KEY_TIME in mess and config.KEY_TYPE in mess \
             and config.KEY_USER in mess
+
+    def test_presence_message_key_action(self):
+        mess = utils.presence_message()
+        assert mess[config.KEY_ACTION] == config.VALUE_PRESENCE
+
+    def test_presence_message_default_user(self):
+        mess = utils.presence_message()
+        assert mess[config.KEY_USER][config.KEY_ACCOUNT_NAME] == config.VALUE_DEFAULT_USER
+
+    def test_presence_message_type(self):
+        with pytest.raises(TypeError):
+            utils.presence_message(123)
+
+    def test_presence_message_long_user_name(self):
+        with pytest.raises(utils.UsernameTooLongError):
+            utils.presence_message('123456789012345678901234567')

@@ -20,6 +20,11 @@ def dict_from_bytes(byte_str):
 
 
 def send_message(web_socket, dict_message):
+    """
+        Sends binary socket message
+        :param web_socket: socket - Socket object
+        :param dict_message: JSON supported JIM protocol
+    """
     result = dict_to_bytes(dict_message)
     web_socket.send(result)
 
@@ -27,10 +32,8 @@ def send_message(web_socket, dict_message):
 def get_message(web_socket):
     """
         Gets binary socket message and returns dictionary
-
         :param web_socket: socket - Socket object
-
-        :return JSON: Message converted to JSON, should support JIM protocol
+        :return: Message converted to JSON, should support JIM protocol
     """
     byte_str = web_socket.recv(1024)
     result = dict_from_bytes(byte_str)
@@ -39,8 +42,19 @@ def get_message(web_socket):
 
 # Messages
 
+
+# Error type for checking string length
+class UsernameTooLongError(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+
 # Create response message
 def response_presence():
+    """
+        Creates JSON with server response message
+        :return: JSON, should support JIM protocol
+    """
     # Time in seconds since the epoch as a floating point number
     current_time = time.time()
     result = {KEY_RESPONSE: HTTP_CODE_OK,
@@ -50,7 +64,16 @@ def response_presence():
 
 
 # Create presence message
-def presence_message(user_name):
+def presence_message(user_name=VALUE_DEFAULT_USER):
+    """
+        Creates client presence message and returns it in JSON
+        :param user_name: str - user name, should be less than 25 characters
+        :return: Message converted to JSON, should support JIM protocol
+    """
+    if not isinstance(user_name, str):
+        raise TypeError
+    if len(user_name) > 25:
+        raise UsernameTooLongError(user_name)
     # Time in seconds since the epoch as a floating point number
     current_time = time.time()
     result = {KEY_ACTION: VALUE_PRESENCE,
@@ -64,7 +87,7 @@ def presence_message(user_name):
 
 
 # Create test message
-def test_message(message, user_to='Guest', user_from='Guest'):
+def test_message(message, user_to=VALUE_DEFAULT_USER, user_from=VALUE_DEFAULT_USER):
     current_time = time.time()
     result = {KEY_ACTION: VALUE_MESSAGE,
               KEY_TIME: current_time,
