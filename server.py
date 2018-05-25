@@ -67,6 +67,7 @@ def read_requests(clients):
         try:
             logging.info('Try to get message from {} {}'.format(sock.fileno(), sock.getpeername()))
             data = utils.get_message(sock)
+            logging.info('Have got message from {}'.format(data))
             responses[sock] = data
         except:
             logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
@@ -86,8 +87,10 @@ def write_responses(requests, clients):
             try:
                 logging.info('Try to send message to {} {}'.format(sock.fileno(), sock.getpeername()))
                 utils.send_message(sock, requests[sock])
+                logging.info('Have sent message {}'.format(requests[sock]))
             except:
                 logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
+                sock.close()
                 clients.remove(sock)
 
 
@@ -122,24 +125,16 @@ def mainloop():
             try:
                 # Taking all clients which are in listening, writing and error mode
                 r_list, w_list, e_list = select.select(clients, clients, [], 0)
+                logging.info('r_list: '.format(r_list))
                 logging.info('w_list: '.format(w_list))
             except Exception as e:
                 # If client disconnects will rise exception
                 logging.info('Exception in select.select')
                 #  Do nothing if client disconnects
                 pass
-            for s_client in w_list:
-                time_str = time.ctime(time.time()) + '\n'
-                try:
-                    # Created and send message to clients which are in listening mode
-                    server_message = utils.test_message(time_str + 'Hello it server')
-                    logging.info('Try send message to {}'.format(s_client))
-                    utils.send_message(s_client, server_message)
-                except:
-                    # Remove clients with disconnected
-                    clients.remove(s_client)
-                finally:
-                    logging.info('Server send message: {}'.format(server_message))
+            requests = read_requests(r_list)
+            write_responses(requests, w_list)
+
 
             # # Getting client message
             # client_message = utils.get_message(client)
