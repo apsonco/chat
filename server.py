@@ -19,6 +19,7 @@ import utils
 from config import *
 
 
+# Creates socket, sets connection number, sets timeout
 def new_listen_socket(address):
     # Create socket
     sock = socket(AF_INET, SOCK_STREAM)
@@ -30,8 +31,8 @@ def new_listen_socket(address):
     return sock
 
 
-# Main cycle for query processing
-def mainloop():
+# Parses command line keys and setups values for socket port and server_address
+def parse_command_line():
     port = DEFAULT_PORT
     server_address = DEFAULT_SERVER_IP_LISTENING_ADDRESS
     # TODO: Edit code for working with console keys -address, -port
@@ -51,6 +52,49 @@ def mainloop():
             except ValueError:
                 print('Value error in server address')
                 sys.exit(0)
+    return port, server_address
+
+
+def read_requests(clients):
+    """
+    Reads requests from clients list and returns dictionary of messages {socket: message}
+    :param clients: list of sockets
+    :return: dictionary of messages
+    """
+    # Dictionary server responses in form {socket: order}
+    responses = {}
+    for sock in clients:
+        try:
+            logging.info('Try to get message from {} {}'.format(sock.fileno(), sock.getpeername()))
+            data = utils.get_message(sock)
+            responses[sock] = data
+        except:
+            logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
+            clients.remove(sock)
+    return responses
+
+
+def write_responses(requests, clients):
+    """
+    Echo response from server to clients (clients which received orders)
+    :param requests: list of request from clients
+    :param clients: list of sockets
+    :return:
+    """
+    for sock in clients:
+        if sock in requests:
+            try:
+                logging.info('Try to send message to {} {}'.format(sock.fileno(), sock.getpeername()))
+                utils.send_message(sock, requests[sock])
+            except:
+                logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
+                clients.remove(sock)
+
+
+# Main cycle for query processing
+def mainloop():
+
+    port, server_address = parse_command_line()
 
     address = (server_address, port)
     clients = []
@@ -76,15 +120,18 @@ def mainloop():
             w_list = []
             r_list = []
             try:
+                # Taking all clients which are in listening, writing and error mode
                 r_list, w_list, e_list = select.select(clients, clients, [], 0)
                 logging.info('w_list: '.format(w_list))
             except Exception as e:
                 # If client disconnects will rise exception
                 logging.info('Exception in select.select')
-                pass   #  Do nothing if client disconnects
+                #  Do nothing if client disconnects
+                pass
             for s_client in w_list:
                 time_str = time.ctime(time.time()) + '\n'
                 try:
+                    # Created and send message to clients which are in listening mode
                     server_message = utils.test_message(time_str + 'Hello it server')
                     logging.info('Try send message to {}'.format(s_client))
                     utils.send_message(s_client, server_message)

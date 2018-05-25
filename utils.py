@@ -25,6 +25,13 @@ def send_message(web_socket, dict_message):
 
 
 def get_message(web_socket):
+    """
+        Gets binary socket message and returns dictionary
+
+        :param web_socket: socket - Socket object
+
+        :return JSON: Message converted to JSON, should support JIM protocol
+    """
     byte_str = web_socket.recv(1024)
     result = dict_from_bytes(byte_str)
     return result
