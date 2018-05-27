@@ -25,6 +25,8 @@ def send_message(web_socket, dict_message):
         :param web_socket: socket - Socket object
         :param dict_message: JSON supported JIM protocol
     """
+    if not isinstance(dict_message, dict):
+        raise TypeError
     result = dict_to_bytes(dict_message)
     web_socket.send(result)
 
@@ -48,6 +50,8 @@ class UsernameTooLongError(Exception):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
 
+    def __str__(self, username):
+        return 'User name {} must be less than 26 characters'.format(username)
 
 # Create response message
 def response_presence():

@@ -13,7 +13,6 @@ import logging
 import sys
 from socket import socket, AF_INET, SOCK_STREAM
 import select
-import time
 
 import utils
 from config import *
@@ -89,7 +88,7 @@ def write_responses(requests, clients):
                 utils.send_message(sock, requests[sock])
                 logging.info('Have sent message {}'.format(requests[sock]))
             except:
-                logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
+                logging.critical('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
                 sock.close()
                 clients.remove(sock)
 
@@ -112,7 +111,7 @@ def mainloop():
             client, addr = sock.accept()
             logging.info('Received order for connection from {}'.format(str(address)))
         except OSError as e:
-            # TODO: add to logger
+            logging.critical('[ {} ] Error in connection with client'.format(e))
             pass    # out from timeout
         else:
             logging.info('Received order for connection with {}'.format(addr))
@@ -129,7 +128,7 @@ def mainloop():
                 logging.info('w_list: '.format(w_list))
             except Exception as e:
                 # If client disconnects will rise exception
-                logging.info('Exception in select.select')
+                logging.critical('Exception in select.select')
                 #  Do nothing if client disconnects
                 pass
             requests = read_requests(r_list)
@@ -159,5 +158,11 @@ def mainloop():
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
+# Uncomment for receiving CRITICAL log messages only
+# format_log = logging.Formatter('%(levelname)-10s %(asctime)s %(message)s')
+# info_handler = logging.StreamHandler(sys.stdout)
+# info_handler.setLevel(logging.CRITICAL)
+# info_handler.setFormatter(format_log)
 
 mainloop()
