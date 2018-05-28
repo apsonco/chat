@@ -19,6 +19,7 @@ from config import *
 
 
 # Creates socket, sets connection number, sets timeout
+
 def new_listen_socket(address):
     # Create socket
     sock = socket(AF_INET, SOCK_STREAM)
@@ -102,67 +103,46 @@ def mainloop():
     clients = []
     sock = new_listen_socket(address)
 
-    logging.info('Set port to {}'.format(port))
-    logging.info('Set server address to {}'.format(server_address))
+    if __debug__:
+        logging.info('Set port to {}'.format(port))
+        logging.info('Set server address to {}'.format(server_address))
 
     while True:
         try:
             # Accept order for connection
             client, addr = sock.accept()
-            logging.info('Received order for connection from {}'.format(str(address)))
+            if __debug__:
+               logging.info('Received order for connection from {}'.format(str(address)))
         except OSError as e:
-            logging.critical('[ {} ] Error in connection with client'.format(e))
+            if __debug__:
+                logging.critical('[ {} ] Error in connection with client'.format(e))
             pass    # out from timeout
         else:
-            logging.info('Received order for connection with {}'.format(addr))
+            if __debug__:
+                logging.info('Received order for connection with {}'.format(addr))
             clients.append(client)
         finally:
             # Checking for input/output events that don't have timeout
-            logging.info('Checking for input/output events')
+            if __debug__:
+                logging.info('Checking for input/output events')
             w_list = []
             r_list = []
             try:
                 # Taking all clients which are in listening, writing and error mode
                 r_list, w_list, e_list = select.select(clients, clients, [], 0)
-                logging.info('r_list: '.format(r_list))
-                logging.info('w_list: '.format(w_list))
+                if __debug__:
+                    logging.info('r_list: '.format(r_list))
+                    logging.info('w_list: '.format(w_list))
             except Exception as e:
                 # If client disconnects will rise exception
-                logging.critical('Exception in select.select')
+                if __debug__:
+                    logging.critical('Exception in select.select')
                 #  Do nothing if client disconnects
                 pass
             requests = read_requests(r_list)
             write_responses(requests, w_list)
 
 
-            # # Getting client message
-            # client_message = utils.get_message(client)
-            # logging.info('Message from client in JSON {}'.format(client_message))
-            #
-            # # Parse client message
-            # if client_message[KEY_ACTION] == VALUE_PRESENCE:
-            #     logging.info('Server received {} action.'.format(VALUE_PRESENCE))
-            #     # Create response for client
-            #     server_message = utils.response_presence()
-            # elif KEY_ACTION in client_message is False:
-            #     print('Server received wrong order')
-            #     logging.info('Server received wrong order')
-            #     server_message = utils.response_error(HTTP_CODE_WRONG_ORDER, STR_ORDER_WITHOUT_PRESENCE)
-            # else:
-            #     print('Server error')
-            #     server_message = utils.response_error(HTTP_CODE_SERVER_ERROR, '')
-            #
-            # # Send response to client
-            # utils.send_message(client, server_message)
-            # client.close()
-
-
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-
-# Uncomment for receiving CRITICAL log messages only
-# format_log = logging.Formatter('%(levelname)-10s %(asctime)s %(message)s')
-# info_handler = logging.StreamHandler(sys.stdout)
-# info_handler.setLevel(logging.CRITICAL)
-# info_handler.setFormatter(format_log)
 
 mainloop()

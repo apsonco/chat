@@ -6,6 +6,7 @@ import time
 import json
 
 from config import *
+import log_config
 
 
 def dict_to_bytes(dict_message):
@@ -19,18 +20,21 @@ def dict_from_bytes(byte_str):
     return result
 
 
+@log_config.logging_dec
 def send_message(web_socket, dict_message):
     """
         Sends binary socket message
         :param web_socket: socket - Socket object
         :param dict_message: JSON supported JIM protocol
     """
-    if not isinstance(dict_message, dict):
-        raise TypeError
+    # TODO: uncomment on Lesson 03
+    # if not isinstance(dict_message, dict):
+    #     raise TypeError
     result = dict_to_bytes(dict_message)
     web_socket.send(result)
 
 
+@log_config.logging_dec
 def get_message(web_socket):
     """
         Gets binary socket message and returns dictionary

@@ -33,6 +33,7 @@ def echo_client():
             msg = input('Your message: ')
             if msg == 'exit':
                 break
+
             utils.send_message(sock, msg)
             # Receive server message
             logging.info('Try get message from '.format(sock))
