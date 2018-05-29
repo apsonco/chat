@@ -2,9 +2,12 @@
 # Python tests for utils.py
 
 import json
+import socket
 
 import utils
 import config
+
+import pytest
 
 
 # Test for dict_to_bytes function
@@ -51,3 +54,59 @@ class TestMessages:
         mess = utils.presence_message('test_user')
         assert config.KEY_ACTION in mess and config.KEY_TIME in mess and config.KEY_TYPE in mess \
             and config.KEY_USER in mess
+
+    def test_presence_message_key_action(self):
+        mess = utils.presence_message()
+        assert mess[config.KEY_ACTION] == config.VALUE_PRESENCE
+
+    def test_presence_message_default_user(self):
+        mess = utils.presence_message()
+        assert mess[config.KEY_USER][config.KEY_ACCOUNT_NAME] == config.VALUE_DEFAULT_USER
+
+    def test_presence_message_type(self):
+        with pytest.raises(TypeError):
+            utils.presence_message(123)
+
+    def test_presence_message_long_user_name(self):
+        with pytest.raises(utils.UsernameTooLongError):
+            utils.presence_message('123456789012345678901234567')
+
+
+# Integration tests
+# Class stub for socket operations
+class ClientSocket():
+    """Class-stub for socket operations"""
+
+    def __init__(self, sock_type=socket.AF_INET, sock_family=socket.SOCK_STREAM):
+        pass
+
+    def recv(self, n):
+        #   Will send the same answer for socket
+        message = {config.KEY_RESPONSE: config.HTTP_CODE_OK}
+        jmessage = json.dumps(message)
+        bmessage = jmessage.encode(config.CHARACTER_ENCODING)
+        return bmessage
+
+    def send(self, bmessage):
+        #   You may redefine send method
+        pass
+
+
+def test_get_message(monkeypatch):
+    # Change original socket for our stub class
+    monkeypatch.setattr("socket.socket", ClientSocket)
+    # Create socket that changed already
+    sock = socket.socket()
+    assert utils.get_message(sock) == {config.KEY_RESPONSE: config.HTTP_CODE_OK}
+
+
+def test_send_message(monkeypatch):
+    # Change original socket for our stub class
+    monkeypatch.setattr("socket.socket", ClientSocket)
+    # Create socket that changed already
+    sock = socket.socket()
+    # Should check that method work, because it dosn't have return
+    assert utils.send_message(sock, {'test': 'test'}) is None
+    # And check for dictionary in parameter
+    with pytest.raises(TypeError):
+        utils.send_message(sock, 'test')

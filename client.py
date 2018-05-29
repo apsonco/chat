@@ -22,27 +22,24 @@ TEST_USER_NAME = 'My_first'
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-# Create TCP socket
-sock = socket(AF_INET, SOCK_STREAM)
 
-# TODO: Edit code for working with console keys -address, -port
+def echo_client():
+    # Create TCP socket
+    with socket(AF_INET, SOCK_STREAM) as sock:
+        # Create connection with server
+        sock.connect(('localhost', 5335))
 
-# Create connection with server
-sock.connect(('localhost', 5335))
-# Create presence message
-message = utils.presence_message(TEST_USER_NAME)
-# Send message to server
-utils.send_message(sock, message)
-# Receive server message
-serverMessage = utils.get_message(sock)
+        while True:
+            msg = input('Your message: ')
+            if msg == 'exit':
+                break
 
-# Parse response message
-code = serverMessage[KEY_RESPONSE]
-if code == HTTP_CODE_OK:
-    print(STR_PRESENCE_RECEIVED)
-elif code == HTTP_CODE_WRONG_ORDER:
-    print(STR_ORDER_WITHOUT_PRESENCE)
+            utils.send_message(sock, msg)
+            # Receive server message
+            logging.info('Try get message from '.format(sock))
+            server_message = utils.get_message(sock)
+            print('Response: {}'.format(server_message))
 
-logging.info('Server response JSON : {}'.format(serverMessage))
 
-sock.close()
+if __name__ == '__main__':
+    echo_client()
