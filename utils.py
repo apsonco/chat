@@ -34,7 +34,6 @@ def send_message(web_socket, dict_message):
     web_socket.send(result)
 
 
-@log_config.logging_dec
 def get_message(web_socket):
     """
         Gets binary socket message and returns dictionary
@@ -56,6 +55,7 @@ class UsernameTooLongError(Exception):
 
     def __str__(self, username):
         return 'User name {} must be less than 26 characters'.format(username)
+
 
 # Create response message
 def response_presence():

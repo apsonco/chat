@@ -27,7 +27,7 @@ def new_listen_socket(address):
     # Switching to listening mode, can serve 5 connections
     sock.listen(5)
     # Set timeout for socket operations
-    sock.settimeout(1)
+    sock.settimeout(0.2)
     return sock
 
 
@@ -94,6 +94,42 @@ def write_responses(requests, clients):
                 clients.remove(sock)
 
 
+def check_client_presence(client):
+    """
+    Check for presence message from client. And send correct answer.
+    :param client: socket
+    :return: True if client send presence message. False otherwise.
+    """
+    # Getting client message
+    client_message = utils.get_message(client)
+    server_message = ''
+    result = False
+    if __debug__:
+        logging.info('Message from client in JSON {}'.format(client_message))
+
+    # Parse client message
+    if client_message[KEY_ACTION] == VALUE_PRESENCE:
+        if __debug__:
+            logging.info('Server received {} action.'.format(VALUE_PRESENCE))
+        # Create response for client
+        server_message = utils.response_presence()
+        result = True
+
+    elif KEY_ACTION in clientMessage is False:
+        if __debug__:
+            logging.info('Server received wrong order')
+        server_message = utils.response_error(HTTP_CODE_WRONG_ORDER, STR_ORDER_WITHOUT_PRESENCE)
+
+    else:
+        if __debug__:
+            logging.info('Server couldnt decode message from client')
+        server_message = utils.response_error(HTTP_CODE_SERVER_ERROR, '')
+
+    # Send response to client
+    utils.send_message(client, server_message)
+    return result
+
+
 # Main cycle for query processing
 def mainloop():
 
@@ -111,11 +147,13 @@ def mainloop():
         try:
             # Accept order for connection
             client, addr = sock.accept()
+            check_client_presence(client)
+
             if __debug__:
-               logging.info('Received order for connection from {}'.format(str(address)))
+                logging.info('Received order for connection from {}'.format(str(addr)))
         except OSError as e:
-            if __debug__:
-                logging.critical('[ {} ] Error in connection with client'.format(e))
+            # if __debug__:
+            #     logging.critical('[ {} ] Error in connection with client'.format(e))
             pass    # out from timeout
         else:
             if __debug__:
@@ -123,16 +161,13 @@ def mainloop():
             clients.append(client)
         finally:
             # Checking for input/output events that don't have timeout
-            if __debug__:
-                logging.info('Checking for input/output events')
+            # if __debug__:
+            #     logging.info('Checking for input/output events')
             w_list = []
             r_list = []
             try:
                 # Taking all clients which are in listening, writing and error mode
                 r_list, w_list, e_list = select.select(clients, clients, [], 0)
-                if __debug__:
-                    logging.info('r_list: '.format(r_list))
-                    logging.info('w_list: '.format(w_list))
             except Exception as e:
                 # If client disconnects will rise exception
                 if __debug__:
@@ -145,4 +180,5 @@ def mainloop():
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-mainloop()
+if __name__ == '__main__':
+    mainloop()
