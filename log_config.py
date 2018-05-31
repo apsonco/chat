@@ -9,8 +9,8 @@ import sys
 def logging_dec(old_func):
     def new_func(*args, **kwargs):
         logging.info('Call {} function'.format(old_func.__name__))
-        old_func(*args, **kwargs)
-
+        result = old_func(*args, **kwargs)
+        return result
     return new_func
 
 

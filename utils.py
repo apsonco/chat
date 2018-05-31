@@ -34,6 +34,7 @@ def send_message(web_socket, dict_message):
     web_socket.send(result)
 
 
+@log_config.logging_dec
 def get_message(web_socket):
     """
         Gets binary socket message and returns dictionary
