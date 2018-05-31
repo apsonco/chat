@@ -16,6 +16,7 @@ import select
 
 import utils
 from config import *
+from JIMResponse import JIMResponse
 
 
 # Creates socket, sets connection number, sets timeout
@@ -102,7 +103,6 @@ def check_client_presence(client):
     """
     # Getting client message
     client_message = utils.get_message(client)
-    server_message = ''
     result = False
     if __debug__:
         logging.info('Message from client in JSON {}'.format(client_message))
@@ -112,18 +112,18 @@ def check_client_presence(client):
         if __debug__:
             logging.info('Server received {} action.'.format(VALUE_PRESENCE))
         # Create response for client
-        server_message = utils.response_presence()
+        server_message = JIMResponse.response_presence()
         result = True
 
     elif KEY_ACTION in clientMessage is False:
         if __debug__:
             logging.info('Server received wrong order')
-        server_message = utils.response_error(HTTP_CODE_WRONG_ORDER, STR_ORDER_WITHOUT_PRESENCE)
+        server_message = JIMResponse.response_error(HTTP_CODE_WRONG_ORDER, STR_ORDER_WITHOUT_PRESENCE)
 
     else:
         if __debug__:
             logging.info('Server couldnt decode message from client')
-        server_message = utils.response_error(HTTP_CODE_SERVER_ERROR, '')
+        server_message = JIMResponse.response_error(HTTP_CODE_SERVER_ERROR, '')
 
     # Send response to client
     utils.send_message(client, server_message)

@@ -17,6 +17,9 @@ import logging
 import utils
 from config import *
 
+from JIMMessage import JIMMessage
+from chat_client import ChatClient
+
 
 TEST_USER_NAME = 'My_first'
 
@@ -30,7 +33,7 @@ def check_presence(sock):
     :param sock - socket.
     :return True if server receive answer 200. False otherwise.
     """
-    message = utils.presence_message()
+    message = JIMMessage.presence_message()
     if __debug__:
         logging.info('Client: Create presence message - {}'.format(message))
     # Send message to server
@@ -50,12 +53,13 @@ def check_presence(sock):
 
 
 def echo_client():
+    chat_client = ChatClient('localhost', 5335)
     # Create TCP socket
     with socket(AF_INET, SOCK_STREAM) as sock:
         # Create connection with server
-        sock.connect(('localhost', 5335))
+        chat_client.connect(sock)
 
-        if check_presence(sock) is True:
+        if chat_client.check_presence() is True:
             if __debug__:
                 logging.info('Sent presence message to server. Received HTTP_OK from server')
             while True:
@@ -63,10 +67,10 @@ def echo_client():
                 if msg == 'exit':
                     break
 
-                utils.send_message(sock, msg)
+                chat_client.send_message(msg)
                 # Receive server message
-                logging.info('Try get message from '.format(sock))
-                server_message = utils.get_message(sock)
+                logging.info('Try get message from '.format(chat_client.get_socket()))
+                server_message = chat_client.get_message()
                 print('Response: {}'.format(server_message))
 
 
