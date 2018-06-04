@@ -8,9 +8,30 @@ import utils
 
 
 class JIMMessage:
+
+    def __init__(self, action, user=VALUE_DEFAULT_USER, user_to=VALUE_DEFAULT_USER):
+        self.action = action
+        self.user_from = user
+        self.user_to = user_to
+        self.message = ''
+
+    def get_jim_message(self, message=''):
+        """
+        Fabric method which chose action type and return appropriate JSON
+        :return: Message converted to JSON, should support JIM protocol
+        """
+        if self.action is VALUE_PRESENCE:
+            result = self.presence_message(self.user_from)
+        elif self.action is VALUE_MESSAGE:
+            result = self.test_message(message, self.user_from, self.user_to)
+        elif self.action is VALUE_QUIT:
+            result = self.quit_message(self.user_from)
+
+        return result
+
     # Create presence message
     @staticmethod
-    def presence_message(user_name=VALUE_DEFAULT_USER):
+    def presence_message(user_name):
         """
             Creates client presence message and returns it in JSON
             :param user_name: str - user name, should be less than 25 characters
@@ -33,7 +54,7 @@ class JIMMessage:
 
     # Create test message
     @staticmethod
-    def test_message(message, user_to=VALUE_DEFAULT_USER, user_from=VALUE_DEFAULT_USER):
+    def test_message(message, user_from=VALUE_DEFAULT_USER, user_to=VALUE_DEFAULT_USER):
         current_time = time.time()
         result = {KEY_ACTION: VALUE_MESSAGE,
                   KEY_TIME: current_time,

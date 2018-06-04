@@ -28,7 +28,7 @@ def new_listen_socket(address):
     # Switching to listening mode, can serve 5 connections
     sock.listen(5)
     # Set timeout for socket operations
-    sock.settimeout(0.2)
+    sock.settimeout(1)
     return sock
 
 
@@ -112,17 +112,20 @@ def check_client_presence(client):
         if __debug__:
             logging.info('Server received {} action.'.format(VALUE_PRESENCE))
         # Create response for client
-        server_message = JIMResponse.response_presence()
+        response = JIMResponse()
+        server_message = response.get_jim_response()
         result = True
 
     elif KEY_ACTION in clientMessage is False:
         if __debug__:
             logging.info('Server received wrong order')
+        # TODO: rewrite using new JIMResponce method get_gim_response
         server_message = JIMResponse.response_error(HTTP_CODE_WRONG_ORDER, STR_ORDER_WITHOUT_PRESENCE)
 
     else:
         if __debug__:
             logging.info('Server couldnt decode message from client')
+        # TODO: rewrite using new JIMResponce method get_gim_response
         server_message = JIMResponse.response_error(HTTP_CODE_SERVER_ERROR, '')
 
     # Send response to client

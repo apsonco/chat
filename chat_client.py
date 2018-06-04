@@ -1,11 +1,7 @@
 # chat_client.py
 # Client class for socket chat
 
-import sys
-from socket import socket, AF_INET, SOCK_STREAM
 import logging
-
-import socketserver
 
 import utils
 from config import *
@@ -34,18 +30,32 @@ class ChatClient:
     def get_socket(self):
         return self.sock
 
+    def get_jim_message(self):
+        jim_message = self.get_message()
+        if __debug__:
+            logging.info('Client: Get message from server - {}'.format(jim_message))
+        if jim_message[KEY_ACTION] == VALUE_MESSAGE:
+            message = jim_message[KEY_MESSAGE]
+        return message
+
+    def send_jim_message(self, msg):
+        message = JIMMessage(VALUE_MESSAGE)
+        jim_message = message.get_jim_message(msg)
+        self.send_message(jim_message)
+
     def check_presence(self):
         """
-            Send presence message.
-            Check response from server.
-            :return True if server receive answer 200. False otherwise.
-            """
-        message = JIMMessage.presence_message()
+        Send presence message.
+        Check response from server.
+        :return True if server receive answer 200. False otherwise.
+        """
+        message = JIMMessage(VALUE_PRESENCE)
+        jim_message = message.get_jim_message()
         if __debug__:
-            logging.info('Client: Create presence message - {}'.format(message))
+            logging.info('Client: Create presence message - {}'.format(jim_message))
 
         # Send message to server
-        self.send_message(message)
+        self.send_message(jim_message)
 
         # Receive server message
         server_message = self.get_message()

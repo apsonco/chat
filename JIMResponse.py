@@ -7,6 +7,18 @@ from config import *
 
 
 class JIMResponse:
+
+    def __init__(self, response_code=HTTP_CODE_OK):
+        self.response_code = response_code
+
+    def get_jim_response(self):
+        if self.response_code == HTTP_CODE_OK:
+            result = self.response_presence()
+        else:
+            # TODO: Write code for error response
+            pass
+        return result
+
     # Create response message
     @staticmethod
     def response_presence():
