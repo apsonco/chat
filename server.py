@@ -11,24 +11,12 @@
 
 import logging
 import sys
-from socket import socket, AF_INET, SOCK_STREAM
-import select
 
 import utils
 from config import *
+from JIMResponse import JIMResponse
 
-
-# Creates socket, sets connection number, sets timeout
-
-def new_listen_socket(address):
-    # Create socket
-    sock = socket(AF_INET, SOCK_STREAM)
-    sock.bind(address)
-    # Switching to listening mode, can serve 5 connections
-    sock.listen(5)
-    # Set timeout for socket operations
-    sock.settimeout(1)
-    return sock
+from chat_server import ChatServer
 
 
 # Parses command line keys and setups values for socket port and server_address
@@ -55,53 +43,12 @@ def parse_command_line():
     return port, server_address
 
 
-def read_requests(clients):
-    """
-    Reads requests from clients list and returns dictionary of messages {socket: message}
-    :param clients: list of sockets
-    :return: dictionary of messages
-    """
-    # Dictionary server responses in form {socket: order}
-    responses = {}
-    for sock in clients:
-        try:
-            logging.info('Try to get message from {} {}'.format(sock.fileno(), sock.getpeername()))
-            data = utils.get_message(sock)
-            logging.info('Have got message from {}'.format(data))
-            responses[sock] = data
-        except:
-            logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
-            clients.remove(sock)
-    return responses
-
-
-def write_responses(requests, clients):
-    """
-    Echo response from server to clients (clients which received orders)
-    :param requests: list of request from clients
-    :param clients: list of sockets
-    :return:
-    """
-    for sock in clients:
-        if sock in requests:
-            try:
-                logging.info('Try to send message to {} {}'.format(sock.fileno(), sock.getpeername()))
-                utils.send_message(sock, requests[sock])
-                logging.info('Have sent message {}'.format(requests[sock]))
-            except:
-                logging.critical('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
-                sock.close()
-                clients.remove(sock)
-
-
 # Main cycle for query processing
 def mainloop():
 
     port, server_address = parse_command_line()
-
-    address = (server_address, port)
-    clients = []
-    sock = new_listen_socket(address)
+    chat_server = ChatServer(server_address, port)
+    sock = chat_server.connect()
 
     if __debug__:
         logging.info('Set port to {}'.format(port))
@@ -111,38 +58,38 @@ def mainloop():
         try:
             # Accept order for connection
             client, addr = sock.accept()
+            chat_server.check_client_presence(client)
+
             if __debug__:
-               logging.info('Received order for connection from {}'.format(str(address)))
+                logging.info('Received order for connection from {}'.format(str(addr)))
         except OSError as e:
-            if __debug__:
-                logging.critical('[ {} ] Error in connection with client'.format(e))
+            # if __debug__:
+            #     logging.critical('[ {} ] Error in connection with client'.format(e))
             pass    # out from timeout
         else:
             if __debug__:
                 logging.info('Received order for connection with {}'.format(addr))
-            clients.append(client)
+            chat_server.add_client(client)
         finally:
             # Checking for input/output events that don't have timeout
-            if __debug__:
-                logging.info('Checking for input/output events')
+            # if __debug__:
+            #     logging.info('Checking for input/output events')
             w_list = []
             r_list = []
             try:
                 # Taking all clients which are in listening, writing and error mode
-                r_list, w_list, e_list = select.select(clients, clients, [], 0)
-                if __debug__:
-                    logging.info('r_list: '.format(r_list))
-                    logging.info('w_list: '.format(w_list))
+                r_list, w_list, e_list = chat_server.select_clients()
             except Exception as e:
                 # If client disconnects will rise exception
                 if __debug__:
                     logging.critical('Exception in select.select')
                 #  Do nothing if client disconnects
                 pass
-            requests = read_requests(r_list)
-            write_responses(requests, w_list)
+            requests = chat_server.read_requests(r_list)
+            chat_server.write_responses(requests, w_list)
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-mainloop()
+if __name__ == '__main__':
+    mainloop()

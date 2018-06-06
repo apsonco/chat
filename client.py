@@ -14,8 +14,7 @@ import sys
 from socket import socket, AF_INET, SOCK_STREAM
 import logging
 
-import utils
-from config import *
+from chat_client import ChatClient
 
 
 TEST_USER_NAME = 'My_first'
@@ -24,21 +23,25 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def echo_client():
+    chat_client = ChatClient('localhost', 5335)
     # Create TCP socket
     with socket(AF_INET, SOCK_STREAM) as sock:
         # Create connection with server
-        sock.connect(('localhost', 5335))
+        chat_client.connect(sock)
 
-        while True:
-            msg = input('Your message: ')
-            if msg == 'exit':
-                break
+        if chat_client.check_presence() is True:
+            if __debug__:
+                logging.info('Sent presence message to server. Received HTTP_OK from server')
+            while True:
+                msg = input('Your message: ')
+                if msg == 'exit':
+                    break
 
-            utils.send_message(sock, msg)
-            # Receive server message
-            logging.info('Try get message from '.format(sock))
-            server_message = utils.get_message(sock)
-            print('Response: {}'.format(server_message))
+                chat_client.send_jim_message(msg)
+                # Receive server message
+                logging.info('Try get message from '.format(chat_client.get_socket()))
+                server_message = chat_client.get_jim_message()
+                print('Response: {}'.format(server_message))
 
 
 if __name__ == '__main__':

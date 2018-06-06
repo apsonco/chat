@@ -2,7 +2,6 @@
 #
 # Utils for serve date transmission via socket
 
-import time
 import json
 
 from config import *
@@ -57,75 +56,3 @@ class UsernameTooLongError(Exception):
     def __str__(self, username):
         return 'User name {} must be less than 26 characters'.format(username)
 
-# Create response message
-def response_presence():
-    """
-        Creates JSON with server response message
-        :return: JSON, should support JIM protocol
-    """
-    # Time in seconds since the epoch as a floating point number
-    current_time = time.time()
-    result = {KEY_RESPONSE: HTTP_CODE_OK,
-              KEY_TIME: current_time,
-              KEY_ALERT: STR_PRESENCE_RECEIVED}
-    return result
-
-
-# Create presence message
-def presence_message(user_name=VALUE_DEFAULT_USER):
-    """
-        Creates client presence message and returns it in JSON
-        :param user_name: str - user name, should be less than 25 characters
-        :return: Message converted to JSON, should support JIM protocol
-    """
-    if not isinstance(user_name, str):
-        raise TypeError
-    if len(user_name) > 25:
-        raise UsernameTooLongError(user_name)
-    # Time in seconds since the epoch as a floating point number
-    current_time = time.time()
-    result = {KEY_ACTION: VALUE_PRESENCE,
-              KEY_TIME: current_time,
-              KEY_TYPE: VALUE_STATUS_DEFAULT,
-              KEY_USER: {
-                  KEY_ACCOUNT_NAME: user_name,
-                  KEY_STATUS: STR_ONLINE
-              }}
-    return result
-
-
-# Create test message
-def test_message(message, user_to=VALUE_DEFAULT_USER, user_from=VALUE_DEFAULT_USER):
-    current_time = time.time()
-    result = {KEY_ACTION: VALUE_MESSAGE,
-              KEY_TIME: current_time,
-              KEY_TO: user_to,
-              KEY_FROM: user_from,
-              KEY_ENCODING: CHARACTER_ENCODING,
-              KEY_MESSAGE: message
-              }
-    return result
-
-
-# Create quit message
-def quit_message(user_name):
-    # Time in seconds since the epoch as a floating point number
-    current_time = time.time()
-    result = {KEY_ACTION: VALUE_QUIT,
-              KEY_TIME: current_time,
-              KEY_TYPE: VALUE_STATUS_DEFAULT,
-              KEY_USER: {
-                  KEY_ACCOUNT_NAME: user_name,
-                  KEY_STATUS: STR_QUIT
-              }}
-    return result
-
-
-# Create error message
-def response_error(code, alert):
-    # Time in seconds since the epoch as a floating point number
-    current_time = time.time()
-    result = {KEY_RESPONSE: code,
-              KEY_TIME: current_time,
-              KEY_ALERT: alert}
-    return result
