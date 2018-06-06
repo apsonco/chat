@@ -23,7 +23,10 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def echo_client():
-    chat_client = ChatClient('localhost', 5335)
+    # Should delete after checking
+    user_name = input('Enter your nickname: ')
+    user_friend = input('Enter your friend name: ')
+    chat_client = ChatClient('localhost', 5335, user_name)
     # Create TCP socket
     with socket(AF_INET, SOCK_STREAM) as sock:
         # Create connection with server
@@ -37,7 +40,7 @@ def echo_client():
                 if msg == 'exit':
                     break
 
-                chat_client.send_jim_message(msg)
+                chat_client.send_jim_message(msg, user_friend)
                 # Receive server message
                 logging.info('Try get message from '.format(chat_client.get_socket()))
                 server_message = chat_client.get_jim_message()

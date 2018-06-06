@@ -1,6 +1,6 @@
 # config.py
 #
-# Configuration file for JIM protocol use
+# Configuration file for jim protocol use
 
 CHARACTER_ENCODING = 'utf-8'
 

@@ -3,18 +3,19 @@
 
 import logging
 
-import utils
-from config import *
+from lib import utils
+from lib.config import *
 
-from JIMMessage import JIMMessage
+from jim.JIMMessage import JIMMessage
 
 
 class ChatClient:
 
-    def __init__(self, server_address, port):
+    def __init__(self, server_address, port, user_name):
         self.server_address = server_address
         self.port = port
         self.sock = None
+        self.user_name = user_name
 
     def connect(self, sock):
         sock.connect((self.server_address, self.port))
@@ -38,8 +39,8 @@ class ChatClient:
             message = jim_message[KEY_MESSAGE]
         return message
 
-    def send_jim_message(self, msg):
-        message = JIMMessage(VALUE_MESSAGE)
+    def send_jim_message(self, msg, user_to=''):
+        message = JIMMessage(VALUE_MESSAGE, self.user_name, user_to)
         jim_message = message.get_jim_message(msg)
         self.send_message(jim_message)
 
@@ -49,7 +50,7 @@ class ChatClient:
         Check response from server.
         :return True if server receive answer 200. False otherwise.
         """
-        message = JIMMessage(VALUE_PRESENCE)
+        message = JIMMessage(VALUE_PRESENCE, self.user_name)
         jim_message = message.get_jim_message()
         if __debug__:
             logging.info('Client: Create presence message - {}'.format(jim_message))

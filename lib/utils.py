@@ -4,8 +4,8 @@
 
 import json
 
-from config import *
-import log_config
+from lib.config import *
+from lib import log_config
 
 
 def dict_to_bytes(dict_message):
@@ -24,7 +24,7 @@ def send_message(web_socket, dict_message):
     """
         Sends binary socket message
         :param web_socket: socket - Socket object
-        :param dict_message: JSON supported JIM protocol
+        :param dict_message: JSON supported jim protocol
     """
     # TODO: uncomment on Lesson 03
     # if not isinstance(dict_message, dict):
@@ -38,7 +38,7 @@ def get_message(web_socket):
     """
         Gets binary socket message and returns dictionary
         :param web_socket: socket - Socket object
-        :return: Message converted to JSON, should support JIM protocol
+        :return: Message converted to JSON, should support jim protocol
     """
     byte_str = web_socket.recv(1024)
     result = dict_from_bytes(byte_str)

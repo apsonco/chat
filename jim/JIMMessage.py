@@ -1,10 +1,10 @@
 # JIMMessage.py
-# Class for message which support JIM protocol
+# Class for message which support jim protocol
 
 import time
 
-from config import *
-import utils
+from lib.config import *
+from lib import utils
 
 
 class JIMMessage:
@@ -18,7 +18,7 @@ class JIMMessage:
     def get_jim_message(self, message=''):
         """
         Fabric method which chose action type and return appropriate JSON
-        :return: Message converted to JSON, should support JIM protocol
+        :return: Message converted to JSON, should support jim protocol
         """
         if self.action is VALUE_PRESENCE:
             result = self.presence_message(self.user_from)
@@ -35,7 +35,7 @@ class JIMMessage:
         """
             Creates client presence message and returns it in JSON
             :param user_name: str - user name, should be less than 25 characters
-            :return: Message converted to JSON, should support JIM protocol
+            :return: Message converted to JSON, should support jim protocol
         """
         if not isinstance(user_name, str):
             raise TypeError

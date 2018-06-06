@@ -5,10 +5,11 @@ import logging
 from socket import socket, AF_INET, SOCK_STREAM
 import select
 
-import utils
-from config import *
+from lib import utils
+from lib.config import *
+from lib import log_config
 
-from JIMResponse import JIMResponse
+from jim.JIMResponse import JIMResponse
 
 
 class ChatServer:
@@ -18,9 +19,14 @@ class ChatServer:
         self.port = port
         self.sock = None
         self.clients = []
+        self.w_list = []
+        self.r_list = []
+        self.e_list = []
+        self.clients_dict = {}
 
-    def add_client(self, client):
+    def add_client(self, client, user_name):
         self.clients.append(client)
+        self.clients_dict[user_name] = client
 
     # Creates socket, sets connection number, sets timeout
     def connect(self):
@@ -38,6 +44,41 @@ class ChatServer:
         r_list, w_list, e_list = select.select(self.clients, self.clients, [], 0)
         return r_list, w_list, e_list
 
+    def listen_for_good(self):
+        while True:
+            try:
+                # Accept order for connection
+                client, addr = self.sock.accept()
+                result, client_name = self.check_client_presence(client)
+
+                if __debug__:
+                    logging.info('Received order for connection from {}'.format(str(addr)))
+            except OSError as e:
+                # if __debug__:
+                #     logging.critical('[ {} ] Error in connection with client'.format(e))
+                pass  # out from timeout
+            else:
+                if __debug__:
+                    logging.info('Received order for connection with {}'.format(addr))
+                self.add_client(client, client_name)
+            finally:
+                # Checking for input/output events that don't have timeout
+                # if __debug__:
+                #     logging.info('Checking for input/output events')
+                self.w_list = []
+                self.r_list = []
+                try:
+                    # Taking all clients which are in listening, writing and error mode
+                    self.r_list, self.w_list, self.e_list = self.select_clients()
+                except Exception as e:
+                    # If client disconnects will rise exception
+                    if __debug__:
+                        logging.critical('Exception in select.select')
+                    #  Do nothing if client disconnects
+                    pass
+                requests = self.read_requests(self.r_list)
+                self.write_responses(requests, self.w_list)
+
     @staticmethod
     def read_requests(read_clients):
         """
@@ -51,31 +92,45 @@ class ChatServer:
             try:
                 logging.info('Try to get message from {} {}'.format(sock.fileno(), sock.getpeername()))
                 data = utils.get_message(sock)
-                logging.info('Have got message from {}'.format(data))
+                logging.info('Have got message from {}'.format(data[KEY_FROM]))
                 responses[sock] = data
             except:
                 logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
                 read_clients.remove(sock)
         return responses
 
-    @staticmethod
-    def write_responses(requests, write_clients):
+    @log_config.logging_dec
+    def write_responses(self, requests, write_clients):
         """
         Echo response from server to clients (clients which received orders)
         :param requests: list of request from clients
         :param write_clients: list of sockets
         :return:
         """
-        for sock in write_clients:
-            if sock in requests:
+        # for sock in write_clients:
+        #     if sock in requests:
+        #         try:
+        #             logging.info('Try to send message to {} {}'.format(sock.fileno(), sock.getpeername()))
+        #             utils.send_message(sock, requests[sock])
+        #             logging.info('Have sent message {}'.format(requests[sock]))
+        #         except:
+        #             logging.critical('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
+        #             sock.close()
+        #             write_clients.remove(sock)
+
+        for sock in requests:
+            user_to = requests[sock][KEY_TO]
+            logging.info('I have message to {}'.format(user_to))
+            if user_to in self.clients_dict.keys():
                 try:
-                    logging.info('Try to send message to {} {}'.format(sock.fileno(), sock.getpeername()))
-                    utils.send_message(sock, requests[sock])
+                    logging.info('Try to send message to {}'.format(user_to))
+                    utils.send_message(self.clients_dict[user_to], requests[sock])
                     logging.info('Have sent message {}'.format(requests[sock]))
                 except:
                     logging.critical('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
                     sock.close()
                     write_clients.remove(sock)
+
 
     @staticmethod
     def check_client_presence(client):
@@ -91,6 +146,8 @@ class ChatServer:
             logging.info('Message from client in JSON {}'.format(client_message))
         # Parse client message
         if client_message[KEY_ACTION] == VALUE_PRESENCE:
+            # Retrieving user name from presence message
+            client_name = client_message[KEY_USER][KEY_ACCOUNT_NAME]
             if __debug__:
                 logging.info('Server received {} action.'.format(VALUE_PRESENCE))
             # Create response for client
@@ -109,4 +166,4 @@ class ChatServer:
             server_message = JIMResponse.response_error(HTTP_CODE_SERVER_ERROR, '')
         # Send response to client
         utils.send_message(client, server_message)
-        return result
+        return result, client_name

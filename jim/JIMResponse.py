@@ -1,9 +1,9 @@
 # JIMResponse.py
-# Class for responses messages which support JIM protocol
+# Class for responses messages which support jim protocol
 
 import time
 
-from config import *
+from lib.config import *
 
 
 class JIMResponse:
@@ -24,7 +24,7 @@ class JIMResponse:
     def response_presence():
         """
             Creates JSON with server response message
-            :return: JSON, should support JIM protocol
+            :return: JSON, should support jim protocol
         """
         # Time in seconds since the epoch as a floating point number
         current_time = time.time()
