@@ -13,6 +13,7 @@
 import sys
 from socket import socket, AF_INET, SOCK_STREAM
 import logging
+import sqlalchemy
 
 from chat_client import ChatClient
 
@@ -23,6 +24,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def echo_client():
+    print('SQL Alchemy version is: ', sqlalchemy.__version__)
     # Should delete after checking
     user_name = input('Enter your nickname: ')
     user_friend = input('Enter your friend name: ')
@@ -43,8 +45,8 @@ def echo_client():
                 chat_client.send_jim_message(msg, user_friend)
                 # Receive server message
                 logging.info('Try get message from '.format(chat_client.get_socket()))
-                server_message = chat_client.get_jim_message()
-                print('Response: {}'.format(server_message))
+                user_from, server_message = chat_client.get_jim_message()
+                print('{}: {}'.format(user_from, server_message))
 
 
 if __name__ == '__main__':

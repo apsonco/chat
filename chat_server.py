@@ -52,14 +52,12 @@ class ChatServer:
                 result, client_name = self.check_client_presence(client)
 
                 if __debug__:
-                    logging.info('Received order for connection from {}'.format(str(addr)))
+                    logging.info('Received order for connection from {}'.format(addr))
             except OSError as e:
                 # if __debug__:
                 #     logging.critical('[ {} ] Error in connection with client'.format(e))
                 pass  # out from timeout
             else:
-                if __debug__:
-                    logging.info('Received order for connection with {}'.format(addr))
                 self.add_client(client, client_name)
             finally:
                 # Checking for input/output events that don't have timeout
@@ -99,25 +97,13 @@ class ChatServer:
                 read_clients.remove(sock)
         return responses
 
-    @log_config.logging_dec
     def write_responses(self, requests, write_clients):
         """
-        Echo response from server to clients (clients which received orders)
+        Send message between clients
         :param requests: list of request from clients
         :param write_clients: list of sockets
         :return:
         """
-        # for sock in write_clients:
-        #     if sock in requests:
-        #         try:
-        #             logging.info('Try to send message to {} {}'.format(sock.fileno(), sock.getpeername()))
-        #             utils.send_message(sock, requests[sock])
-        #             logging.info('Have sent message {}'.format(requests[sock]))
-        #         except:
-        #             logging.critical('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
-        #             sock.close()
-        #             write_clients.remove(sock)
-
         for sock in requests:
             user_to = requests[sock][KEY_TO]
             logging.info('I have message to {}'.format(user_to))

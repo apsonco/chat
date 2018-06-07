@@ -48,5 +48,4 @@ chat_server = ChatServer(server_address, port)
 sock = chat_server.connect()
 if __debug__:
     logging.info('Set port to {}'.format(port))
-    logging.info('Set server address to {}'.format(server_address))
 chat_server.listen_for_good()

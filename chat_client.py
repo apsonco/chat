@@ -37,7 +37,8 @@ class ChatClient:
             logging.info('Client: Get message from server - {}'.format(jim_message))
         if jim_message[KEY_ACTION] == VALUE_MESSAGE:
             message = jim_message[KEY_MESSAGE]
-        return message
+            user_from = jim_message[KEY_FROM]
+        return user_from, message
 
     def send_jim_message(self, msg, user_to=''):
         message = JIMMessage(VALUE_MESSAGE, self.user_name, user_to)
