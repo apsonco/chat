@@ -13,9 +13,8 @@
 import sys
 from socket import socket, AF_INET, SOCK_STREAM
 import logging
-import sqlalchemy
 
-from chat_client import ChatClient
+from client.chat_client import ChatClient
 
 
 TEST_USER_NAME = 'My_first'
@@ -24,7 +23,6 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def echo_client():
-    print('SQL Alchemy version is: ', sqlalchemy.__version__)
     # Should delete after checking
     user_name = input('Enter your nickname: ')
     user_friend = input('Enter your friend name: ')
