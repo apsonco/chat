@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from lib.config import DB_PATH
 import db_init
 
 GUEST = 'Guest'
@@ -38,7 +39,7 @@ class TestDb:
 
         db_init.create_tables()
 
-        engine = create_engine('sqlite:///srv_chat.db', echo=True)
+        engine = create_engine('sqlite:///' + DB_PATH, echo=True)
         # Create session
         Session = sessionmaker(bind=engine)
         # Class session creates new objects which bind with data base

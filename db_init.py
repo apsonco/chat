@@ -4,6 +4,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 
+from lib.config import DB_PATH
+
 
 def create_tables():
     metadata = MetaData()
@@ -17,7 +19,7 @@ def create_tables():
                           Column('owner_id', Integer, ForeignKey(clients_table.c.id)),
                           Column('friend_id', Integer, ForeignKey(clients_table.c.id))
                           )
-    engine = create_engine('sqlite:///srv_chat.db', echo=True)
+    engine = create_engine('sqlite:///' + DB_PATH, echo=True)
     metadata.create_all(engine)
 
 

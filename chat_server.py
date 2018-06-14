@@ -11,6 +11,8 @@ from lib import log_config
 
 from jim.JIMResponse import JIMResponse
 
+from client_manager import ClientManager
+
 
 class ChatServer:
 
@@ -152,4 +154,9 @@ class ChatServer:
             server_message = JIMResponse.response_error(HTTP_CODE_SERVER_ERROR, '')
         # Send response to client
         utils.send_message(client, server_message)
+
+        # Storing user to data base
+        cl_manager = ClientManager()
+        cl_manager.add_client(client_message[KEY_USER][KEY_ACCOUNT_NAME])
+
         return result, client_name

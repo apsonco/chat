@@ -3,6 +3,7 @@
 # Configuration file for jim protocol use
 
 CHARACTER_ENCODING = 'utf-8'
+DB_PATH = 'srv_chat.db'
 
 KEY_RESPONSE = 'response'
 KEY_TIME = 'time'

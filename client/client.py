@@ -14,7 +14,7 @@ import sys
 from socket import socket, AF_INET, SOCK_STREAM
 import logging
 
-from client.chat_client import ChatClient
+from chat_client import ChatClient
 
 
 TEST_USER_NAME = 'My_first'
