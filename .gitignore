@@ -4,6 +4,4 @@ __pycache__
 .idea
 venv
 app.log
-chat.db
-db_sample.py
 srv_chat.db

@@ -15,6 +15,7 @@ from socket import socket, AF_INET, SOCK_STREAM
 import logging
 
 from chat_client import ChatClient
+import lib.config
 
 
 TEST_USER_NAME = 'My_first'
@@ -36,11 +37,18 @@ def echo_client():
             if __debug__:
                 logging.info('Sent presence message to server. Received HTTP_OK from server')
             while True:
-                msg = input('Your message: ')
+                msg = input('Your message (exit, get_contacts): ')
                 if msg == 'exit':
                     break
-
-                chat_client.send_jim_message(msg, user_friend)
+                elif msg == 'get_contacts':
+                    chat_client.send_jim_message(lib.config.VALUE_GET_CONTACTS)
+                    quantity = chat_client.get_jim_contacts()
+                    for i in range(quantity):
+                        contact_id, contact_name = chat_client.get_jim_message()
+                        print('I have received: {} - contact id, {} - contact name'.format(contact_id, contact_name))
+                        # TODO: Put contact_id and contact_name into data base
+                else:
+                    chat_client.send_jim_message(lib.config.VALUE_MESSAGE, msg, user_friend)
                 # Receive server message
                 logging.info('Try get message from '.format(chat_client.get_socket()))
                 user_from, server_message = chat_client.get_jim_message()

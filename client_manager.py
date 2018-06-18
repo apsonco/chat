@@ -1,24 +1,11 @@
 # client_manager.py
 # ClientManager class is responsible for storing and getting info from data base
 
-from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 
 from lib.config import DB_PATH
-
-Base = declarative_base()
-
-
-# Clients table from srv_chat.db DB
-class Client(Base):
-    __tablename__ = 'clients'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(25))
-
-    def __init__(self, name):
-        self.name = name
+from db_model import Client
 
 
 class ClientManager:
@@ -57,3 +44,16 @@ class ClientManager:
             return -1
         else:
             return res.id
+
+    def get_contacts(self, client_name):
+        """
+        Gets all client contacts
+        :param client_name: Client name which is equivalent in database field clients.name
+        :return: list of contacts (may be empty)
+        """
+        res = self.find(client_name)
+        if res == -1:
+            result = ()
+        else:
+            result = {'1': 'test_user'}
+        return result

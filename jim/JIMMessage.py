@@ -15,7 +15,7 @@ class JIMMessage:
         self.user_to = user_to
         self.message = ''
 
-    def get_jim_message(self, message=''):
+    def create_jim_message(self, message=''):
         """
         Fabric method which chose action type and return appropriate JSON
         :return: Message converted to JSON, should support jim protocol
@@ -24,6 +24,8 @@ class JIMMessage:
             result = self.presence_message(self.user_from)
         elif self.action is VALUE_MESSAGE:
             result = self.test_message(message, self.user_from, self.user_to)
+        elif self.action is VALUE_GET_CONTACTS:
+            result = self.get_contacts(self.user_from)
         elif self.action is VALUE_QUIT:
             result = self.quit_message(self.user_from)
 
@@ -62,6 +64,17 @@ class JIMMessage:
                   KEY_FROM: user_from,
                   KEY_ENCODING: CHARACTER_ENCODING,
                   KEY_MESSAGE: message
+                  }
+        return result
+
+    # Create test message
+    @staticmethod
+    def get_contacts(user_from=VALUE_DEFAULT_USER):
+        current_time = time.time()
+        result = {KEY_ACTION: VALUE_GET_CONTACTS,
+                  KEY_TIME: current_time,
+                  KEY_FROM: user_from,
+                  KEY_ENCODING: CHARACTER_ENCODING,
                   }
         return result
 

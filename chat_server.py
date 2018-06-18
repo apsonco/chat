@@ -79,8 +79,43 @@ class ChatServer:
                 requests = self.read_requests(self.r_list)
                 self.write_responses(requests, self.w_list)
 
-    @staticmethod
-    def read_requests(read_clients):
+    @log_config.logging_dec
+    def parse_request(self, data, sock):
+        """
+        Parse type of input service message and call equivalent function
+        :param data: Input JSON message
+        :param sock: Client socket
+        :return: nothing
+        """
+        if data[KEY_ACTION] == VALUE_GET_CONTACTS:
+            logging.info('Have got : {} message'.format(VALUE_GET_CONTACTS))
+            self.send_contacts(data[KEY_FROM], sock)
+
+    @log_config.logging_dec
+    def send_contacts(self, client_name, sock):
+        """
+        Extract client_name contact list from database and send it to client_name
+        :param client_name: Client name
+        :param sock: Client socket
+        :return:
+        """
+        cl_manager = ClientManager()
+        contact_list = cl_manager.get_contacts(client_name)
+        logging.info('contact_list is {}'.format(contact_list))
+        response = JIMResponse(HTTP_CODE_ACCEPTED, len(contact_list))
+        # First step - return quantity of contacts
+        server_message = response.get_jim_response()
+        logging.info('response contact list JSON: {}'.format(server_message))
+        utils.send_message(sock, server_message)
+        # Second step - return contacts list
+        for key, value in contact_list:
+            server_message = response.response_contact(key, value)
+            logging.info('Before Sent contact id = {}, name = {} to client'.format(key, value))
+            utils.send_message(sock, server_message)
+            logging.info('After Sent contact id = {}, name = {} to client'.format(key, value))
+        print('{} has next contacts: {}'.format(client_name, contact_list))
+
+    def read_requests(self, read_clients):
         """
         Reads requests from clients list and returns dictionary of messages {socket: message}
         :param read_clients: list of sockets
@@ -92,8 +127,11 @@ class ChatServer:
             try:
                 logging.info('Try to get message from {} {}'.format(sock.fileno(), sock.getpeername()))
                 data = utils.get_message(sock)
-                logging.info('Have got message from {}'.format(data[KEY_FROM]))
+                logging.info('RR function Have got message from {}'.format(data[KEY_FROM]))
+                logging.info('RR funсtion JSON message is: {}'.format(data))
                 responses[sock] = data
+                # function for parse service messages
+                self.parse_request(data, sock)
             except:
                 logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
                 read_clients.remove(sock)
@@ -107,18 +145,20 @@ class ChatServer:
         :return:
         """
         for sock in requests:
-            user_to = requests[sock][KEY_TO]
-            logging.info('I have message to {}'.format(user_to))
-            if user_to in self.clients_dict.keys():
-                try:
-                    logging.info('Try to send message to {}'.format(user_to))
-                    utils.send_message(self.clients_dict[user_to], requests[sock])
-                    logging.info('Have sent message {}'.format(requests[sock]))
-                except:
-                    logging.critical('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
-                    sock.close()
-                    write_clients.remove(sock)
-
+            if requests[sock][KEY_ACTION] == VALUE_GET_CONTACTS:
+                pass
+            else:
+                user_to = requests[sock][KEY_TO]
+                logging.info('I have message to {}'.format(user_to))
+                if user_to in self.clients_dict.keys():
+                    try:
+                        logging.info('Try to send message to {}'.format(user_to))
+                        utils.send_message(self.clients_dict[user_to], requests[sock])
+                        logging.info('Have sent message {}'.format(requests[sock]))
+                    except:
+                        logging.critical('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
+                        sock.close()
+                        write_clients.remove(sock)
 
     @staticmethod
     def check_client_presence(client):

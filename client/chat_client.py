@@ -16,6 +16,7 @@ class ChatClient:
         self.port = port
         self.sock = None
         self.user_name = user_name
+        self.contact_list = {}
 
     def connect(self, sock):
         sock.connect((self.server_address, self.port))
@@ -38,11 +39,27 @@ class ChatClient:
         if jim_message[KEY_ACTION] == VALUE_MESSAGE:
             message = jim_message[KEY_MESSAGE]
             user_from = jim_message[KEY_FROM]
+        elif jim_message[KEY_ACTION] == VALUE_CONTACT_LIST:
+            friend_id = jim_message.keys()[2]
+            friend_name = jim_message[friend_id]
+            return friend_id, friend_name
         return user_from, message
 
-    def send_jim_message(self, msg, user_to=''):
-        message = JIMMessage(VALUE_MESSAGE, self.user_name, user_to)
-        jim_message = message.get_jim_message(msg)
+    def get_jim_contacts(self):
+        """
+        Receive contacts list quantity
+        :return: Quantity of contacts
+        """
+        jim_message = self.get_message()
+        if __debug__:
+            logging.info('Client: Get message from server - {}'.format(jim_message))
+        if jim_message[KEY_RESPONSE] == HTTP_CODE_ACCEPTED:
+            quantity = jim_message[KEY_QUANTITY]
+        return quantity
+
+    def send_jim_message(self, value_msg, msg='', user_to=''):
+        message = JIMMessage(value_msg, self.user_name, user_to)
+        jim_message = message.create_jim_message(msg)
         self.send_message(jim_message)
 
     def check_presence(self):
@@ -52,7 +69,7 @@ class ChatClient:
         :return True if server receive answer 200. False otherwise.
         """
         message = JIMMessage(VALUE_PRESENCE, self.user_name)
-        jim_message = message.get_jim_message()
+        jim_message = message.create_jim_message()
         if __debug__:
             logging.info('Client: Create presence message - {}'.format(jim_message))
 
