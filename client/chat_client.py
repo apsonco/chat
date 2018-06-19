@@ -5,6 +5,7 @@ import logging
 
 from lib import utils
 from lib.config import *
+from lib import log_config
 
 from jim.JIMMessage import JIMMessage
 
@@ -32,6 +33,7 @@ class ChatClient:
     def get_socket(self):
         return self.sock
 
+    @log_config.logging_dec
     def get_jim_message(self):
         jim_message = self.get_message()
         if __debug__:
@@ -40,7 +42,8 @@ class ChatClient:
             message = jim_message[KEY_MESSAGE]
             user_from = jim_message[KEY_FROM]
         elif jim_message[KEY_ACTION] == VALUE_CONTACT_LIST:
-            friend_id = jim_message.keys()[2]
+            res = list(jim_message)
+            friend_id = res[2]
             friend_name = jim_message[friend_id]
             return friend_id, friend_name
         return user_from, message

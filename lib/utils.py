@@ -19,7 +19,7 @@ def dict_from_bytes(byte_str):
     return result
 
 
-# @log_config.logging_dec
+@log_config.logging_dec
 def send_message(web_socket, dict_message):
     """
         Sends binary socket message

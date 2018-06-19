@@ -88,7 +88,7 @@ class ChatServer:
         :return: nothing
         """
         if data[KEY_ACTION] == VALUE_GET_CONTACTS:
-            logging.info('Have got : {} message'.format(VALUE_GET_CONTACTS))
+            logging.info('Have got _{}_ message from {}'.format(VALUE_GET_CONTACTS, data[KEY_FROM]))
             self.send_contacts(data[KEY_FROM], sock)
 
     @log_config.logging_dec
@@ -103,16 +103,16 @@ class ChatServer:
         contact_list = cl_manager.get_contacts(client_name)
         logging.info('contact_list is {}'.format(contact_list))
         response = JIMResponse(HTTP_CODE_ACCEPTED, len(contact_list))
+
         # First step - return quantity of contacts
         server_message = response.get_jim_response()
         logging.info('response contact list JSON: {}'.format(server_message))
         utils.send_message(sock, server_message)
+
         # Second step - return contacts list
-        for key, value in contact_list:
+        for key, value in contact_list.items():
             server_message = response.response_contact(key, value)
-            logging.info('Before Sent contact id = {}, name = {} to client'.format(key, value))
             utils.send_message(sock, server_message)
-            logging.info('After Sent contact id = {}, name = {} to client'.format(key, value))
         print('{} has next contacts: {}'.format(client_name, contact_list))
 
     def read_requests(self, read_clients):

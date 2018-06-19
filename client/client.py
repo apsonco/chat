@@ -47,6 +47,7 @@ def echo_client():
                         contact_id, contact_name = chat_client.get_jim_message()
                         print('I have received: {} - contact id, {} - contact name'.format(contact_id, contact_name))
                         # TODO: Put contact_id and contact_name into data base
+                    print('Contacts receiving completed.')
                 else:
                     chat_client.send_jim_message(lib.config.VALUE_MESSAGE, msg, user_friend)
                 # Receive server message

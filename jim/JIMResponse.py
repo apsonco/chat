@@ -4,6 +4,7 @@
 import time
 
 from lib.config import *
+from lib import log_config
 
 
 class JIMResponse:
