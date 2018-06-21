@@ -23,6 +23,24 @@ TEST_USER_NAME = 'My_first'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
+def get_contacts(client):
+    client.send_jim_message(lib.config.VALUE_GET_CONTACTS)
+    quantity = client.get_jim_contacts()
+    for i in range(quantity):
+        contact_id, contact_name = client.get_jim_message()
+        print('I have received: {} - contact id, {} - contact name'.format(contact_id, contact_name))
+        # TODO: Put contact_id and contact_name into data base
+    print('Contacts receiving completed.')
+
+
+def add_contact(client, contact):
+    client.send_add_contact(contact)
+    # TODO: Create response on server
+    response_code = client.get_jim_message()
+    if response_code == lib.config.HTTP_CODE_OK:
+        print('Server added contact {}'.format(contact))
+
+
 def echo_client():
     # Should delete after checking
     user_name = input('Enter your nickname: ')
@@ -37,17 +55,14 @@ def echo_client():
             if __debug__:
                 logging.info('Sent presence message to server. Received HTTP_OK from server')
             while True:
-                msg = input('Your message (exit, get_contacts): ')
+                msg = input('Your message (exit, get_contacts, add_contact): ')
                 if msg == 'exit':
                     break
                 elif msg == 'get_contacts':
-                    chat_client.send_jim_message(lib.config.VALUE_GET_CONTACTS)
-                    quantity = chat_client.get_jim_contacts()
-                    for i in range(quantity):
-                        contact_id, contact_name = chat_client.get_jim_message()
-                        print('I have received: {} - contact id, {} - contact name'.format(contact_id, contact_name))
-                        # TODO: Put contact_id and contact_name into data base
-                    print('Contacts receiving completed.')
+                    get_contacts(chat_client)
+                elif msg == 'add_contact':
+                    contact = input('Enter contact: ')
+                    add_contact(chat_client, contact)
                 else:
                     chat_client.send_jim_message(lib.config.VALUE_MESSAGE, msg, user_friend)
                 # Receive server message

@@ -15,7 +15,7 @@ class JIMResponse:
 
     def get_jim_response(self):
         if self.response_code == HTTP_CODE_OK:
-            result = self.response_presence()
+            result = self.response_ok()
         elif self.response_code == HTTP_CODE_ACCEPTED:
             result = self.response_quantity(self.special_value)
         else:
@@ -25,7 +25,7 @@ class JIMResponse:
 
     # Create response message
     @staticmethod
-    def response_presence():
+    def response_ok():
         """
             Creates JSON with server response message
             :return: JSON, should support jim protocol
@@ -33,8 +33,8 @@ class JIMResponse:
         # Time in seconds since the epoch as a floating point number
         current_time = time.time()
         result = {KEY_RESPONSE: HTTP_CODE_OK,
-                  KEY_TIME: current_time,
-                  KEY_ALERT: STR_PRESENCE_RECEIVED}
+                  KEY_TIME: current_time}
+                 # KEY_ALERT: STR_PRESENCE_RECEIVED}
         return result
 
     # Create contact list quantity message

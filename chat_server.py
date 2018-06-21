@@ -11,7 +11,7 @@ from lib import log_config
 
 from jim.JIMResponse import JIMResponse
 
-from client_manager import ClientManager
+from server_db_manager import ClientManager
 
 
 class ChatServer:
@@ -24,11 +24,14 @@ class ChatServer:
         self.w_list = []
         self.r_list = []
         self.e_list = []
-        self.clients_dict = {}
+        # TODO: Rewrite code that dosen't need use clients_dict
+        self.clients_dict = {} # Has format {'client_name': WebSocket}
+        self.clients_names = {} # Has forma {WebSocket: 'client_name'}
 
     def add_client(self, client, user_name):
         self.clients.append(client)
         self.clients_dict[user_name] = client
+        self.clients_names[client] = user_name
 
     # Creates socket, sets connection number, sets timeout
     def connect(self):
@@ -38,7 +41,7 @@ class ChatServer:
         # Switching to listening mode, can serve 5 connections
         self.sock.listen(5)
         # Set timeout for socket operations
-        self.sock.settimeout(1)
+        self.sock.settimeout(0.25)
         return self.sock
 
     # Taking all clients which are in listening, writing and error mode
@@ -90,6 +93,11 @@ class ChatServer:
         if data[KEY_ACTION] == VALUE_GET_CONTACTS:
             logging.info('Have got _{}_ message from {}'.format(VALUE_GET_CONTACTS, data[KEY_FROM]))
             self.send_contacts(data[KEY_FROM], sock)
+        elif data[KEY_ACTION] == VALUE_ADD_CONTACT:
+            logging.info('Have got _{}_ message from {}'.format(VALUE_ADD_CONTACT, self.clients_names[sock]))
+            self.add_contact(data[KEY_USER_ID], sock)
+
+            # *** DONT WORK - self.client_names[sock]
 
     @log_config.logging_dec
     def send_contacts(self, client_name, sock):
@@ -113,7 +121,24 @@ class ChatServer:
         for key, value in contact_list.items():
             server_message = response.response_contact(key, value)
             utils.send_message(sock, server_message)
+            logging.info('Sent contact message JSON: {}'.format(server_message))
         print('{} has next contacts: {}'.format(client_name, contact_list))
+
+    @log_config.logging_dec
+    def add_contact(self, contact_name, sock):
+        """
+        Store new contact to database and send message to client
+        :param contact_name:
+        :param sock:
+        :return:
+        """
+        cl_manager = ClientManager()
+        res = cl_manager.add_contact(self.clients_names[sock], contact_name)
+        if res is True:
+            response = JIMResponse()
+        server_message = response.get_jim_response()
+        logging.info('response contact list JSON: {}'.format(server_message))
+        utils.send_message(sock, server_message)
 
     def read_requests(self, read_clients):
         """
@@ -125,9 +150,8 @@ class ChatServer:
         responses = {}
         for sock in read_clients:
             try:
-                logging.info('Try to get message from {} {}'.format(sock.fileno(), sock.getpeername()))
+                logging.info('RR function Try to get message from {} {}'.format(sock.fileno(), sock.getpeername()))
                 data = utils.get_message(sock)
-                logging.info('RR function Have got message from {}'.format(data[KEY_FROM]))
                 logging.info('RR funсtion JSON message is: {}'.format(data))
                 responses[sock] = data
                 # function for parse service messages
@@ -145,7 +169,7 @@ class ChatServer:
         :return:
         """
         for sock in requests:
-            if requests[sock][KEY_ACTION] == VALUE_GET_CONTACTS:
+            if requests[sock][KEY_ACTION] == VALUE_GET_CONTACTS or requests[sock][KEY_ACTION] == VALUE_ADD_CONTACT:
                 pass
             else:
                 user_to = requests[sock][KEY_TO]
