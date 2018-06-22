@@ -4,8 +4,7 @@
 import json
 import socket
 
-import utils
-import config
+from lib import utils, config
 
 import pytest
 
@@ -53,7 +52,7 @@ class TestMessages:
     def test_presence_message(self):
         mess = utils.presence_message('test_user')
         assert config.KEY_ACTION in mess and config.KEY_TIME in mess and config.KEY_TYPE in mess \
-            and config.KEY_USER in mess
+               and config.KEY_USER in mess
 
     def test_presence_message_key_action(self):
         mess = utils.presence_message()

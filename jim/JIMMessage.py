@@ -1,10 +1,10 @@
 # JIMMessage.py
-# Class for message which support JIM protocol
+# Class for message which support jim protocol
 
 import time
 
-from config import *
-import utils
+from lib.config import *
+from lib import utils
 
 
 class JIMMessage:
@@ -15,15 +15,19 @@ class JIMMessage:
         self.user_to = user_to
         self.message = ''
 
-    def get_jim_message(self, message=''):
+    def create_jim_message(self, message=''):
         """
         Fabric method which chose action type and return appropriate JSON
-        :return: Message converted to JSON, should support JIM protocol
+        :return: Message converted to JSON, should support jim protocol
         """
         if self.action is VALUE_PRESENCE:
             result = self.presence_message(self.user_from)
         elif self.action is VALUE_MESSAGE:
             result = self.test_message(message, self.user_from, self.user_to)
+        elif self.action is VALUE_GET_CONTACTS:
+            result = self.get_contacts(self.user_from)
+        elif self.action is VALUE_ADD_CONTACT:
+            result = self.get_add_contact(message)
         elif self.action is VALUE_QUIT:
             result = self.quit_message(self.user_from)
 
@@ -35,7 +39,7 @@ class JIMMessage:
         """
             Creates client presence message and returns it in JSON
             :param user_name: str - user name, should be less than 25 characters
-            :return: Message converted to JSON, should support JIM protocol
+            :return: Message converted to JSON, should support jim protocol
         """
         if not isinstance(user_name, str):
             raise TypeError
@@ -62,6 +66,27 @@ class JIMMessage:
                   KEY_FROM: user_from,
                   KEY_ENCODING: CHARACTER_ENCODING,
                   KEY_MESSAGE: message
+                  }
+        return result
+
+    # Create test message
+    @staticmethod
+    def get_contacts(user_from=VALUE_DEFAULT_USER):
+        current_time = time.time()
+        result = {KEY_ACTION: VALUE_GET_CONTACTS,
+                  KEY_TIME: current_time,
+                  KEY_FROM: user_from,
+                  KEY_ENCODING: CHARACTER_ENCODING,
+                  }
+        return result
+
+    # Create add contact message
+    @staticmethod
+    def get_add_contact(client):
+        current_time = time.time()
+        result = {KEY_ACTION: VALUE_ADD_CONTACT,
+                  KEY_USER_ID: client,
+                  KEY_TIME: current_time
                   }
         return result
 
