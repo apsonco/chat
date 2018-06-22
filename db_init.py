@@ -9,15 +9,15 @@ from lib.config import DB_PATH
 
 def create_tables():
     metadata = MetaData()
-    clients_table = Table('clients', metadata,
-                          Column('id', Integer, primary_key=True),
-                          Column('name', String(25), unique=True)
+    clients_table = Table("clients", metadata,
+                          Column("id", Integer, primary_key=True),
+                          Column("name", String(25), unique=True)
                           )
 
-    contact_table = Table('contacts', metadata,
-                          Column('id', Integer, primary_key=True),
-                          Column('owner_id', Integer, ForeignKey(clients_table.c.id)),
-                          Column('friend_id', Integer, ForeignKey(clients_table.c.id))
+    contact_table = Table("contacts", metadata,
+                          Column("id", Integer, primary_key=True),
+                          Column("owner_id", Integer, ForeignKey('clients.id')), #clients_table.c.id)),
+                          Column("friend_id", Integer, ForeignKey('clients.id')) #clients_table.c.id))
                           )
     engine = create_engine('sqlite:///' + DB_PATH, echo=True)
     metadata.create_all(engine)

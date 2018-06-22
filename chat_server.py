@@ -97,8 +97,6 @@ class ChatServer:
             logging.info('Have got _{}_ message from {}'.format(VALUE_ADD_CONTACT, self.clients_names[sock]))
             self.add_contact(data[KEY_USER_ID], sock)
 
-            # *** DONT WORK - self.client_names[sock]
-
     @log_config.logging_dec
     def send_contacts(self, client_name, sock):
         """

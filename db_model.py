@@ -2,6 +2,7 @@
 # Classes for database
 
 from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -21,8 +22,8 @@ class Client(Base):
 class Contact(Base):
     __tablename__ = 'contacts'
     id = Column('id', Integer, primary_key=True)
-    owner_id = Column('owner_id', Integer, ForeignKey('Client.id'))
-    friend_id = Column('friend_id', Integer, ForeignKey('Client.id'))
+    owner_id = Column(Integer, ForeignKey(Client.id))
+    friend_id = Column(Integer, ForeignKey(Client.id))
 
     def __init__(self, owner_id, friend_id):
         self.owner_id = owner_id

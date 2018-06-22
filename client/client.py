@@ -25,7 +25,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 def get_contacts(client):
     client.send_jim_message(lib.config.VALUE_GET_CONTACTS)
-    quantity = client.get_jim_contacts()
+    quantity = client.get_jim_response()
     for i in range(quantity):
         contact_id, contact_name = client.get_jim_message()
         print('I have received: {} - contact id, {} - contact name'.format(contact_id, contact_name))
@@ -35,10 +35,11 @@ def get_contacts(client):
 
 def add_contact(client, contact):
     client.send_add_contact(contact)
-    # TODO: Create response on server
-    response_code = client.get_jim_message()
+    response_code = client.get_jim_response()
     if response_code == lib.config.HTTP_CODE_OK:
         print('Server added contact {}'.format(contact))
+    else:
+        print('Server error adding contact')
 
 
 def echo_client():

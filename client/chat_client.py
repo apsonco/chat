@@ -48,16 +48,19 @@ class ChatClient:
             return friend_id, friend_name
         return user_from, message
 
-    def get_jim_contacts(self):
+    @log_config.logging_dec
+    def get_jim_response(self):
         """
-        Receive contacts list quantity
-        :return: Quantity of contacts
+        Receive server response
+        :return: Quantity of contacts or KEY_RESPONSE
         """
         jim_message = self.get_message()
         if __debug__:
             logging.info('Client: Get message from server - {}'.format(jim_message))
         if jim_message[KEY_RESPONSE] == HTTP_CODE_ACCEPTED:
             quantity = jim_message[KEY_QUANTITY]
+        elif jim_message[KEY_RESPONSE] == HTTP_CODE_OK:
+            return HTTP_CODE_OK
         return quantity
 
     @log_config.logging_dec
