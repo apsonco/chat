@@ -61,6 +61,8 @@ class ChatClient:
             quantity = jim_message[KEY_QUANTITY]
         elif jim_message[KEY_RESPONSE] == HTTP_CODE_OK:
             return HTTP_CODE_OK
+        elif jim_message[KEY_RESPONSE] == HTTP_CODE_NOT_FOUND:
+            return jim_message[KEY_ALERT]
         return quantity
 
     @log_config.logging_dec
@@ -99,4 +101,26 @@ class ChatClient:
             result = True
         # elif code == HTTP_CODE_WRONG_ORDER:
         #     print(STR_ORDER_WITHOUT_PRESENCE)
+        return result
+
+    def get_contacts(self):
+        self.send_jim_message(VALUE_GET_CONTACTS)
+        quantity = self.get_jim_response()
+        result = []
+        for i in range(quantity):
+            contact_id, contact_name = self.get_jim_message()
+            logging.info('I have received: {} - contact id, {} - contact name'.format(contact_id, contact_name))
+            result.append(contact_name)
+            # TODO: Put contact_id and contact_name into data base
+        return result
+
+    def add_contact(self, contact):
+        self.send_add_contact(contact)
+        response_code = self.get_jim_response()
+        if response_code == HTTP_CODE_OK:
+            result = True
+            logging.info('Server added contact {}'.format(contact))
+        else:
+            result = False
+            logging.info(response_code)
         return result

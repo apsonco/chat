@@ -1,4 +1,4 @@
-# client.py
+# console_client.py
 #
 # Client application. Program send presence message to server and receive response message using socket
 # List functions:
@@ -6,7 +6,7 @@
 # - send message to server
 # - receive response from server
 # - parse response message
-# Shell parameters client.py <address> [<port>]:
+# Shell parameters console_client.py <address> [<port>]:
 # - address - server IP address
 # - port - server TCP port, 5335 by default
 
@@ -21,25 +21,6 @@ import lib.config
 TEST_USER_NAME = 'My_first'
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-
-
-def get_contacts(client):
-    client.send_jim_message(lib.config.VALUE_GET_CONTACTS)
-    quantity = client.get_jim_response()
-    for i in range(quantity):
-        contact_id, contact_name = client.get_jim_message()
-        print('I have received: {} - contact id, {} - contact name'.format(contact_id, contact_name))
-        # TODO: Put contact_id and contact_name into data base
-    print('Contacts receiving completed.')
-
-
-def add_contact(client, contact):
-    client.send_add_contact(contact)
-    response_code = client.get_jim_response()
-    if response_code == lib.config.HTTP_CODE_OK:
-        print('Server added contact {}'.format(contact))
-    else:
-        print('Server error adding contact')
 
 
 def echo_client():
@@ -60,10 +41,11 @@ def echo_client():
                 if msg == 'exit':
                     break
                 elif msg == 'get_contacts':
-                    get_contacts(chat_client)
+                    # get_contacts(chat_client)
+                    print(chat_client.get_contacts())
                 elif msg == 'add_contact':
                     contact = input('Enter contact: ')
-                    add_contact(chat_client, contact)
+                    chat_client.add_contact(contact)
                 else:
                     chat_client.send_jim_message(lib.config.VALUE_MESSAGE, msg, user_friend)
                 # Receive server message
