@@ -2,6 +2,7 @@
 # Client class for socket chat
 
 import logging
+import time
 
 from lib import utils
 from lib.config import *
@@ -72,10 +73,12 @@ class ChatClient:
         self.send_message(jim_message)
         logging.info('chat_client.py - sent message to server: {}'.format(jim_message))
 
-    def send_jim_message(self, value_msg, msg='', user_to=''):
+    def send_jim_message(self, value_msg=VALUE_MESSAGE, msg='', user_to=''):
         message = JIMMessage(value_msg, self.user_name, user_to)
         jim_message = message.create_jim_message(msg)
         self.send_message(jim_message)
+        message_time = time.gmtime(float(jim_message[KEY_TIME]))
+        return str(message_time.tm_hour) + ':' + str(message_time.tm_min)
 
     def check_presence(self):
         """

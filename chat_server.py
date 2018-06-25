@@ -160,8 +160,10 @@ class ChatServer:
                 # function for parse service messages
                 self.parse_request(data, sock)
             except:
-                logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
-                read_clients.remove(sock)
+                # TODO: uncomment it and solve connection problem
+                pass
+                # logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
+                # read_clients.remove(sock)
         return responses
 
     def write_responses(self, requests, write_clients):
