@@ -47,7 +47,9 @@ class ChatClient:
             friend_id = res[2]
             friend_name = jim_message[friend_id]
             return friend_id, friend_name
-        return user_from, message
+        message_time = time.gmtime(float(jim_message[KEY_TIME]))
+        str_time = str(message_time.tm_hour) + ':' + str(message_time.tm_min)
+        return user_from, message, str_time
 
     @log_config.logging_dec
     def get_jim_response(self):
