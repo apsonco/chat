@@ -11,7 +11,7 @@ from lib import log_config
 
 from jim.JIMResponse import JIMResponse
 
-from server_db_manager import ClientManager
+from server_db_manager import ServerDbManager
 
 
 class ChatServer:
@@ -105,8 +105,8 @@ class ChatServer:
         :param sock: Client socket
         :return:
         """
-        cl_manager = ClientManager()
-        contact_list = cl_manager.get_contacts(client_name)
+        db_manager = ServerDbManager()
+        contact_list = db_manager.get_contacts(client_name)
         logging.info('contact_list is {}'.format(contact_list))
         response = JIMResponse(HTTP_CODE_ACCEPTED, len(contact_list))
 
@@ -130,11 +130,16 @@ class ChatServer:
         :param sock:
         :return:
         """
-        cl_manager = ClientManager()
-        res = cl_manager.add_contact(self.clients_names[sock], contact_name)
+        db_manager = ServerDbManager()
+        res = db_manager.add_contact(self.clients_names[sock], contact_name)
         if res is True:
             response = JIMResponse()
-        server_message = response.get_jim_response()
+            server_message = response.get_jim_response()
+        else:
+            # if contact doesn't exist or other issues with data base
+            response = JIMResponse()
+            server_message = response.response_error(HTTP_CODE_NOT_FOUND,
+                                                     'contact doesnt exist or other issues with data base')
         logging.info('response contact list JSON: {}'.format(server_message))
         utils.send_message(sock, server_message)
 
@@ -155,8 +160,10 @@ class ChatServer:
                 # function for parse service messages
                 self.parse_request(data, sock)
             except:
-                logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
-                read_clients.remove(sock)
+                # TODO: uncomment it and solve connection problem
+                pass
+                # logging.info('Client {} {} has disconnected'.format(sock.fileno(), sock.getpeername()))
+                # read_clients.remove(sock)
         return responses
 
     def write_responses(self, requests, write_clients):
@@ -218,7 +225,7 @@ class ChatServer:
         utils.send_message(client, server_message)
 
         # Storing user to data base
-        cl_manager = ClientManager()
+        cl_manager = ServerDbManager()
         cl_manager.add_client(client_message[KEY_USER][KEY_ACCOUNT_NAME])
 
         return result, client_name

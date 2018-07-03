@@ -10,7 +10,7 @@ from lib import log_config
 from db_model import Client, Contact
 
 
-class ClientManager:
+class ServerDbManager:
     """
     Class for handling information in data base
     """
@@ -92,4 +92,14 @@ class ClientManager:
             logging.info('Add_contact. Session committed')
             result = True
         return result
+
+    @log_config.logging_dec
+    def del_contact(self, client_name, contact_name):
+        """
+        Delete contact from Contact table
+        :param client_name:
+        :param contact_name:
+        :return: False if client or contact doesn't exist, True if information stored
+        """
+        pass
 
