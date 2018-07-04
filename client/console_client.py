@@ -15,10 +15,10 @@ from socket import socket, AF_INET, SOCK_STREAM
 import logging
 import time
 from threading import Thread
-from queue import Queue
+from queue import Queue, LifoQueue
 
 from chat_client import ChatClient
-import lib.config
+from lib.config import *
 
 
 class GetMessagesThread(Thread):
@@ -30,32 +30,16 @@ class GetMessagesThread(Thread):
 
     def run(self):
         while True:
-            user_from, server_message, str_time = self.chat_client.get_jim_message()
-            print('{} {}: {}'.format(str_time, user_from, server_message))
+            jim_message = self.chat_client.get_message()
+            if KEY_ACTION in jim_message:
+                # user_from, server_message, str_time = self.chat_client.get_jim_message()
+                print('{} {}: {}'.format(jim_message[KEY_TIME], jim_message[KEY_FROM], jim_message[KEY_MESSAGE]))
+            elif KEY_RESPONSE in jim_message:
+                self.chat_client.request_queue.put(jim_message)
             time.sleep(self.interval)
 
     def set_client(self, chat_client):
         self.chat_client = chat_client
-
-
-class WorkerThread(Thread):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.input_queue = Queue()
-
-    def send(self, item):
-        self.input_queue.put(item)
-
-    def close(self):
-        self.input_queue.put(None)
-        self.input_queue.join()
-
-    def run(self):
-        logging.info('start queue...')
-        self.input_queue.get()
-        self.input_queue.task_done()
-        logging.info('end queue...')
-        return
 
 
 TEST_USER_NAME = 'My_first'
@@ -80,9 +64,6 @@ def echo_client():
             get_thread.set_client(chat_client)
             get_thread.start()
 
-            working_thread = WorkerThread()
-            working_thread.start()
-
             while True:
                 msg = input('Your message (exit, get_contacts, add_contact): ')
                 if msg == 'exit':
@@ -91,12 +72,9 @@ def echo_client():
                     print(chat_client.get_contacts())
                 elif msg == 'add_contact':
                     contact = input('Enter contact: ')
-
-                    working_thread.send(chat_client.add_contact(contact))
-                    #working_thread.close()
-
+                    chat_client.add_contact(contact)
                 else:
-                    chat_client.send_jim_message(lib.config.VALUE_MESSAGE, msg, user_friend)
+                    chat_client.send_jim_message(VALUE_MESSAGE, msg, user_friend)
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@
 
 import logging
 import time
+from queue import Queue
 
 from lib import utils
 from lib.config import *
@@ -19,6 +20,7 @@ class ChatClient:
         self.sock = None
         self.user_name = user_name
         self.contact_list = {}
+        self.request_queue = Queue()
 
     def connect(self, sock):
         sock.connect((self.server_address, self.port))
@@ -36,6 +38,7 @@ class ChatClient:
 
     @log_config.logging_dec
     def get_jim_message(self):
+        # TODO: Should rewrite because we use threads in client for receiving messages
         jim_message = self.get_message()
         if __debug__:
             logging.info('Client: Get message from server - {}'.format(jim_message))
@@ -121,7 +124,9 @@ class ChatClient:
 
     def add_contact(self, contact):
         self.send_add_contact(contact)
-        response_code = self.get_jim_response()
+        message = self.request_queue.get()
+        response_code = message[KEY_RESPONSE]
+        # response_code = self.get_jim_response()
         if response_code == HTTP_CODE_OK:
             result = True
             logging.info('Server added contact {}'.format(contact))
