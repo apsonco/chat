@@ -3,10 +3,9 @@
 # TODO: See lesson 02 and do it working
 
 import logging
-import sys
 
 
-def logging_dec(old_func):
+def log(old_func):
     def new_func(*args, **kwargs):
         logging.info('Call {} function'.format(old_func.__name__))
         result = old_func(*args, **kwargs)

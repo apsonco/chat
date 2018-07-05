@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 import logging
 
 from lib.config import DB_PATH
-from lib import log_config
+from lib.log_config import log
 from db_model import Client, Contact
 
 
@@ -15,7 +15,7 @@ class ServerDbManager:
     Class for handling information in data base
     """
 
-    @log_config.logging_dec
+    @log
     def __init__(self):
         self.engine = create_engine('sqlite:///' + DB_PATH, echo=False)
         Session = sessionmaker(bind=self.engine)
@@ -51,7 +51,7 @@ class ServerDbManager:
         else:
             return res.id
 
-    @log_config.logging_dec
+    @log
     def get_contacts(self, client_name):
         """
         Gets all client contacts
@@ -67,7 +67,7 @@ class ServerDbManager:
                 result[item.friend_id] = client.name
         return result
 
-    @log_config.logging_dec
+    @log
     def add_contact(self, client_name, contact_name):
         """
         Add new contact to Contact table
@@ -93,7 +93,7 @@ class ServerDbManager:
             result = True
         return result
 
-    @log_config.logging_dec
+    @log
     def del_contact(self, client_name, contact_name):
         """
         Delete contact from Contact table
@@ -101,5 +101,19 @@ class ServerDbManager:
         :param contact_name:
         :return: False if client or contact doesn't exist, True if information stored
         """
-        pass
+        logging.info('User: {} Del contact {}'.format(client_name, contact_name))
+        client_id = self.find_by_name(client_name)
+        contact_id = self.find_by_name(contact_name)
+        # client = self.session.query(Client).filter(Client.name == client_name).first()
+        # contact = self.session.query(Client).filter(Client.name == contact_name).first()
+        logging.info('{} client_id: {}, {} contact_id: {}'.format(client_name, client_id, contact_name, contact_id))
+        if client_id == -1 or contact_id == -1:
+            result = False
+        else:
+            contact_record = self.session.query(Contact).filter(Contact.owner_id == client_id,
+                                                                Contact.friend_id == contact_id).first()
+            self.session.delete(contact_record)
+            self.session.commit()
+            result = True
+        return result
 

@@ -27,7 +27,9 @@ class JIMMessage:
         elif self.action is VALUE_GET_CONTACTS:
             result = self.get_contacts(self.user_from)
         elif self.action is VALUE_ADD_CONTACT:
-            result = self.get_add_contact(message)
+            result = self.get_add_del_contact(VALUE_ADD_CONTACT, message)
+        elif self.action is VALUE_DEL_CONTACT:
+            result = self.get_add_del_contact(VALUE_DEL_CONTACT, message)
         elif self.action is VALUE_QUIT:
             result = self.quit_message(self.user_from)
 
@@ -82,9 +84,9 @@ class JIMMessage:
 
     # Create add contact message
     @staticmethod
-    def get_add_contact(client):
+    def get_add_del_contact(value, client):
         current_time = time.time()
-        result = {KEY_ACTION: VALUE_ADD_CONTACT,
+        result = {KEY_ACTION: value,
                   KEY_USER_ID: client,
                   KEY_TIME: current_time
                   }

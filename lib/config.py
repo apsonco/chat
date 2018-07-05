@@ -26,7 +26,7 @@ VALUE_STATUS_DEFAULT = 'status'
 VALUE_MESSAGE = 'msg'
 VALUE_GET_CONTACTS = 'get_contacts'
 VALUE_ADD_CONTACT = 'add_contact'
-VAlUE_DEL_CONTACT = 'del_contact'
+VALUE_DEL_CONTACT = 'del_contact'
 VALUE_CONTACT_LIST = 'contact_list'
 VALUE_DEFAULT_USER = 'Guest'
 

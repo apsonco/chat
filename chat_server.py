@@ -7,7 +7,7 @@ import select
 
 from lib import utils
 from lib.config import *
-from lib import log_config
+from lib.log_config import log
 
 from jim.JIMResponse import JIMResponse
 
@@ -82,7 +82,7 @@ class ChatServer:
                 requests = self.read_requests(self.r_list)
                 self.write_responses(requests, self.w_list)
 
-    @log_config.logging_dec
+    @log
     def parse_request(self, data, sock):
         """
         Parse type of input service message and call equivalent function
@@ -96,8 +96,11 @@ class ChatServer:
         elif data[KEY_ACTION] == VALUE_ADD_CONTACT:
             logging.info('Have got _{}_ message from {}'.format(VALUE_ADD_CONTACT, self.clients_names[sock]))
             self.add_contact(data[KEY_USER_ID], sock)
+        elif data[KEY_ACTION] == VALUE_DEL_CONTACT:
+            logging.info('Have got _{}_ message from {}'.format(VALUE_ADD_CONTACT, self.clients_names[sock]))
+            self.del_contact(data[KEY_USER_ID], sock)
 
-    @log_config.logging_dec
+    @log
     def send_contacts(self, client_name, sock):
         """
         Extract client_name contact list from database and send it to client_name
@@ -122,7 +125,6 @@ class ChatServer:
             logging.info('Sent contact message JSON: {}'.format(server_message))
         print('{} has next contacts: {}'.format(client_name, contact_list))
 
-    @log_config.logging_dec
     def add_contact(self, contact_name, sock):
         """
         Store new contact to database and send message to client
@@ -132,6 +134,26 @@ class ChatServer:
         """
         db_manager = ServerDbManager()
         res = db_manager.add_contact(self.clients_names[sock], contact_name)
+        if res is True:
+            response = JIMResponse()
+            server_message = response.get_jim_response()
+        else:
+            # if contact doesn't exist or other issues with data base
+            response = JIMResponse()
+            server_message = response.response_error(HTTP_CODE_NOT_FOUND,
+                                                     'contact doesnt exist or other issues with data base')
+        logging.info('response contact list JSON: {}'.format(server_message))
+        utils.send_message(sock, server_message)
+
+    def del_contact(self, contact_name, sock):
+        """
+        Delete contact from database and send message with code to client
+        :param contact_name:
+        :param sock:
+        :return:
+        """
+        db_manager = ServerDbManager()
+        res = db_manager.del_contact(self.clients_names[sock], contact_name)
         if res is True:
             response = JIMResponse()
             server_message = response.get_jim_response()
@@ -174,9 +196,11 @@ class ChatServer:
         :return:
         """
         for sock in requests:
-            if requests[sock][KEY_ACTION] == VALUE_GET_CONTACTS or requests[sock][KEY_ACTION] == VALUE_ADD_CONTACT:
-                pass
-            else:
+            # if requests[sock][KEY_ACTION] == VALUE_GET_CONTACTS or requests[sock][KEY_ACTION] == VALUE_ADD_CONTACT \
+            #     or requests[sock][KEY_ACTION] == VALUE_DEL_CONTACT:
+            #     pass
+            # else:
+            if requests[sock][KEY_ACTION] == VALUE_MESSAGE:
                 user_to = requests[sock][KEY_TO]
                 logging.info('I have message to {}'.format(user_to))
                 if user_to in self.clients_dict.keys():
