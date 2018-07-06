@@ -58,6 +58,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 def echo_client():
     # Should delete after checking
     user_name = input('Enter your nickname: ')
+    user_password = 'king'
     user_friend = input('Enter your friend name: ')
     chat_client = ChatClient('localhost', 5335, user_name)
     # Create TCP socket
@@ -67,6 +68,7 @@ def echo_client():
         get_thread = GetMessagesThread(chat_client)
 
         if chat_client.check_presence() is True:
+            if
             if __debug__:
                 logging.info('Sent presence message to server. Received HTTP_OK from server')
 

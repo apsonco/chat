@@ -4,6 +4,7 @@
 import logging
 import time
 from queue import Queue
+import hmac
 
 from lib import utils
 from lib.config import *
@@ -40,6 +41,22 @@ class ChatClient:
     def get_socket(self):
         return self.sock
 
+    def authenticate(self, secret_key):
+        """
+        Authenticate user on server using password as a secret_key
+        :param secret_key:
+        :return: True if server has user with such password or else otherwise
+        """
+        message = self.sock.recv(32)
+        client_hash = hmac.new(secret_key, message)
+        digest = client_hash.digest()
+        self.sock.send(digest)
+        # TODO: receive response from server
+        # TODO: analyse response from server
+        response = True
+        return response
+
+
     @log
     def get_jim_message(self):
         # TODO: Should rewrite because we use threads in client for receiving messages
@@ -57,24 +74,6 @@ class ChatClient:
         message_time = time.gmtime(float(jim_message[KEY_TIME]))
         str_time = str(message_time.tm_hour) + ':' + str(message_time.tm_min)
         return user_from, message, str_time
-
-    # TODO: Delete if don't necessary
-    # @log
-    # def get_jim_response(self):
-    #     """
-    #     Receive server response
-    #     :return: Quantity of contacts or KEY_RESPONSE
-    #     """
-    #     jim_message = self.get_message()
-    #     if __debug__:
-    #         logging.info('Client: Get message from server - {}'.format(jim_message))
-    #     if jim_message[KEY_RESPONSE] == HTTP_CODE_ACCEPTED:
-    #         quantity = jim_message[KEY_QUANTITY]
-    #     elif jim_message[KEY_RESPONSE] == HTTP_CODE_OK:
-    #         return HTTP_CODE_OK
-    #     elif jim_message[KEY_RESPONSE] == HTTP_CODE_NOT_FOUND:
-    #         return jim_message[KEY_ALERT]
-    #     return quantity
 
     def send_add_del_contact(self, value, client):
         message = JIMMessage(value)
