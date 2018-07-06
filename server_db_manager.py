@@ -101,19 +101,18 @@ class ServerDbManager:
         :param contact_name:
         :return: False if client or contact doesn't exist, True if information stored
         """
-        logging.info('User: {} Del contact {}'.format(client_name, contact_name))
+        logging.info('User: {} wants delete contact {}'.format(client_name, contact_name))
         client_id = self.find_by_name(client_name)
         contact_id = self.find_by_name(contact_name)
-        # client = self.session.query(Client).filter(Client.name == client_name).first()
-        # contact = self.session.query(Client).filter(Client.name == contact_name).first()
-        logging.info('{} client_id: {}, {} contact_id: {}'.format(client_name, client_id, contact_name, contact_id))
         if client_id == -1 or contact_id == -1:
             result = False
         else:
             contact_record = self.session.query(Contact).filter(Contact.owner_id == client_id,
                                                                 Contact.friend_id == contact_id).first()
             self.session.delete(contact_record)
+            logging.info('Del_contact. Contact deleted in session')
             self.session.commit()
+            logging.info('Del_contact. Session committed')
             result = True
         return result
 
