@@ -17,6 +17,7 @@ from threading import Thread
 
 from chat_client import ChatClient
 from lib.config import *
+from lib.log_config import log
 
 
 class GetMessagesThread(Thread):
@@ -24,20 +25,30 @@ class GetMessagesThread(Thread):
         super().__init__()
         self.daemon = False # False by default
         self.chat_client = chat_client
+        self.is_close = False
 
     def run(self):
         while True:
-            jim_message = self.chat_client.get_message()
+            if self.is_close is True:
+                break
+            try:
+                jim_message = self.chat_client.get_message()
+            except OSError:
+                break
             if KEY_ACTION in jim_message and jim_message[KEY_ACTION] == VALUE_MESSAGE:
-                # user_from, server_message, str_time = self.chat_client.get_jim_message()
                 print('{} {}: {}'.format(jim_message[KEY_TIME], jim_message[KEY_FROM], jim_message[KEY_MESSAGE]))
             else:
                 self.chat_client.request_queue.put(jim_message)
                 self.chat_client.request_queue.task_done()
 
-    def close(self):
+        logging.info('Finish GetMessageThread')
+        return
+
+    @log
+    def stop(self):
         self.chat_client.request_queue.put(None)
-        #self.chat_client.request_queue.join()
+        self.is_close = True
+        return
 
 
 TEST_USER_NAME = 'My_first'
@@ -64,7 +75,6 @@ def echo_client():
             while True:
                 msg = input('Your message (exit, get_contacts, add_contact, del_contact): ')
                 if msg == 'exit':
-                    get_thread.close()
                     break
                 elif msg == 'get_contacts':
                     print(chat_client.get_contacts())
@@ -76,8 +86,8 @@ def echo_client():
                     chat_client.del_contact(contact)
                 else:
                     chat_client.send_jim_message(VALUE_MESSAGE, msg, user_friend)
-
             chat_client.disconnect()
+            get_thread.stop()
 
 
 if __name__ == '__main__':
