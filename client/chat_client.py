@@ -36,6 +36,7 @@ class ChatClient:
 
     def get_message(self):
         server_message = utils.get_message(self.sock)
+        logging.info('chat_client.py got message from server: {}'.format(server_message))
         return server_message
 
     def get_socket(self):
@@ -47,14 +48,25 @@ class ChatClient:
         :param secret_key:
         :return: True if server has user with such password or else otherwise
         """
+        result = False
         message = self.sock.recv(32)
-        client_hash = hmac.new(secret_key, message)
+        if __debug__:
+            logging.info('Authentication. Server random message {}'.format(message.decode))
+
+        pair = self.user_name + secret_key
+        client_hash = hmac.new(pair.encode(CHARACTER_ENCODING), message)
         digest = client_hash.digest()
         self.sock.send(digest)
-        # TODO: receive response from server
-        # TODO: analyse response from server
-        response = True
-        return response
+        if __debug__:
+            logging.info('Authentication. Client digest {}'.format(digest.decode))
+
+        response = self.sock.recv(2)
+        if __debug__:
+            logging.info('Authentication. Server response {}'.format(response.decode))
+
+        if response == b'Ok':
+            result = True
+        return result
 
 
     @log
@@ -109,6 +121,8 @@ class ChatClient:
         code = server_message[KEY_RESPONSE]
         if code == HTTP_CODE_OK:
             result = True
+            if __debug__:
+                logging.info('Sent presence message to server. Received HTTP_OK from server')
         # elif code == HTTP_CODE_WRONG_ORDER:
         #     print(STR_ORDER_WITHOUT_PRESENCE)
         return result

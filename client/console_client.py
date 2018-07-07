@@ -15,7 +15,7 @@ from socket import socket, AF_INET, SOCK_STREAM
 import logging
 from threading import Thread
 
-from chat_client import ChatClient
+from client.chat_client import ChatClient
 from lib.config import *
 from lib.log_config import log
 
@@ -34,7 +34,8 @@ class GetMessagesThread(Thread):
             try:
                 jim_message = self.chat_client.get_message()
             except OSError:
-                break
+                if self.is_close is True:
+                    break
             if KEY_ACTION in jim_message and jim_message[KEY_ACTION] == VALUE_MESSAGE:
                 print('{} {}: {}'.format(jim_message[KEY_TIME], jim_message[KEY_FROM], jim_message[KEY_MESSAGE]))
             else:
@@ -58,8 +59,13 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 def echo_client():
     # Should delete after checking
     user_name = input('Enter your nickname: ')
+
+    # TODO: Rewrite - user must enter password
     user_password = 'king'
+
+    # TODO: Rewrite - user could use any user from contat list
     user_friend = input('Enter your friend name: ')
+
     chat_client = ChatClient('localhost', 5335, user_name)
     # Create TCP socket
     with socket(AF_INET, SOCK_STREAM) as sock:
@@ -67,13 +73,9 @@ def echo_client():
         chat_client.connect(sock)
         get_thread = GetMessagesThread(chat_client)
 
-        if chat_client.check_presence() is True:
-            if
-            if __debug__:
-                logging.info('Sent presence message to server. Received HTTP_OK from server')
-
+        # TODO: Rewrite - add registration for user
+        if chat_client.check_presence() is True and chat_client.authenticate(user_password) is True:
             get_thread.start()
-
             while True:
                 msg = input('Your message (exit, get_contacts, add_contact, del_contact): ')
                 if msg == 'exit':
@@ -88,8 +90,9 @@ def echo_client():
                     chat_client.del_contact(contact)
                 else:
                     chat_client.send_jim_message(VALUE_MESSAGE, msg, user_friend)
-            chat_client.disconnect()
             get_thread.stop()
+            chat_client.disconnect()
+
 
 
 if __name__ == '__main__':

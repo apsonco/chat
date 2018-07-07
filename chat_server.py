@@ -4,6 +4,8 @@
 import logging
 from socket import socket, AF_INET, SOCK_STREAM
 import select
+import os
+import hmac
 
 from lib import utils
 from lib.config import *
@@ -54,8 +56,7 @@ class ChatServer:
             try:
                 # Accept order for connection
                 client, addr = self.sock.accept()
-                result, client_name = self.check_client_presence(client)
-
+                result_presence, client_name = self.check_client_presence(client)
                 if __debug__:
                     logging.info('Received order for connection from {}'.format(addr))
             except OSError as e:
@@ -63,7 +64,9 @@ class ChatServer:
                 #     logging.critical('[ {} ] Error in connection with client'.format(e))
                 pass  # out from timeout
             else:
-                self.add_client(client, client_name)
+                if result_presence is True:
+                    if self.srv_authenticate(client, client_name) is True:
+                        self.add_client(client, client_name)
             finally:
                 # Checking for input/output events that don't have timeout
                 # if __debug__:
@@ -217,7 +220,7 @@ class ChatServer:
     def check_client_presence(client):
         """
         Check for presence message from client. And send correct answer.
-        :param client: socket
+        :param client: client socket
         :return: True if client send presence message. False otherwise.
         """
         # Getting client message
@@ -238,12 +241,12 @@ class ChatServer:
         elif KEY_ACTION in clientMessage is False:
             if __debug__:
                 logging.info('Server received wrong order')
-            # TODO: rewrite using new JIMResponce method get_gim_response
+            # TODO: rewrite using new JIMResponse method get_gim_response
             server_message = JIMResponse.response_error(HTTP_CODE_WRONG_ORDER, STR_ORDER_WITHOUT_PRESENCE)
         else:
             if __debug__:
                 logging.info('Server couldnt decode message from client')
-            # TODO: rewrite using new JIMResponce method get_gim_response
+            # TODO: rewrite using new JIMResponse method get_gim_response
             server_message = JIMResponse.response_error(HTTP_CODE_SERVER_ERROR, '')
         # Send response to client
         utils.send_message(client, server_message)
@@ -253,3 +256,41 @@ class ChatServer:
         cl_manager.add_client(client_message[KEY_USER][KEY_ACCOUNT_NAME])
 
         return result, client_name
+
+    @staticmethod
+    def srv_authenticate(client, client_name):
+        """
+        Authenticate client using HMAC
+        :param client: client socket
+        :param client_name: user name
+        :return: True if client and password exits in data base
+        """
+        # Create random message and send it to client
+        random_message = os.urandom(32)
+        client.send(random_message)
+        if __debug__:
+            logging.info('Authentication. Random message: {}'.format(random_message.decode))
+
+        # TODO: Change to retrieve user password from data base
+        secret_key = 'king'
+        pair = client_name + secret_key
+
+        # Do HMAC from message and secret key
+        hash_code = hmac.new(pair.encode(CHARACTER_ENCODING), random_message)
+        digest = hash_code.digest()
+        if __debug__:
+            logging.info('Authentication. Server digest: {}'.format(digest.decode))
+
+        # Compare client response with local result
+        response = client.recv(len(digest))
+        if __debug__:
+            logging.info('Authentication. Client digest {}'.format(response.decode))
+
+        result = hmac.compare_digest(digest, response)
+        if result is True:
+            server_response = b'Ok'
+        else:
+            server_response = b'No'
+        client.send(server_response)
+        return result
+
