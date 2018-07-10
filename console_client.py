@@ -15,7 +15,7 @@ from socket import socket, AF_INET, SOCK_STREAM
 import logging
 from threading import Thread
 
-from client.chat_client import ChatClient
+from chat_client import ChatClient
 from lib.config import *
 from lib.log_config import log
 
@@ -63,7 +63,7 @@ def echo_client():
     # TODO: Rewrite - user must enter password
     user_password = 'king'
 
-    # TODO: Rewrite - user could use any user from contat list
+    # TODO: Rewrite - user could use any user from contact list
     user_friend = input('Enter your friend name: ')
 
     chat_client = ChatClient('localhost', 5335, user_name)
@@ -92,7 +92,6 @@ def echo_client():
                     chat_client.send_jim_message(VALUE_MESSAGE, msg, user_friend)
             get_thread.stop()
             chat_client.disconnect()
-
 
 
 if __name__ == '__main__':

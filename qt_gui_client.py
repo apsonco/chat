@@ -1,10 +1,9 @@
-from PyQt5 import QtWidgets, uic, QtGui
+from PyQt5 import QtWidgets, uic
 import sys
 from socket import socket, AF_INET, SOCK_STREAM
-import logging
-from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 
-from client.chat_client import ChatClient
+from chat_client import ChatClient
 
 
 class SockHandler(QObject):
