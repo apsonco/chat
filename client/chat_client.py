@@ -4,6 +4,7 @@
 import logging
 import time
 from queue import Queue
+import hmac
 
 from lib import utils
 from lib.config import *
@@ -35,10 +36,38 @@ class ChatClient:
 
     def get_message(self):
         server_message = utils.get_message(self.sock)
+        logging.info('chat_client.py got message from server: {}'.format(server_message))
         return server_message
 
     def get_socket(self):
         return self.sock
+
+    def authenticate(self, secret_key):
+        """
+        Authenticate user on server using password as a secret_key
+        :param secret_key:
+        :return: True if server has user with such password or else otherwise
+        """
+        result = False
+        message = self.sock.recv(32)
+        if __debug__:
+            logging.info('Authentication. Server random message {}'.format(message.decode))
+
+        pair = self.user_name + secret_key
+        client_hash = hmac.new(pair.encode(CHARACTER_ENCODING), message)
+        digest = client_hash.digest()
+        self.sock.send(digest)
+        if __debug__:
+            logging.info('Authentication. Client digest {}'.format(digest.decode))
+
+        response = self.sock.recv(2)
+        if __debug__:
+            logging.info('Authentication. Server response {}'.format(response.decode))
+
+        if response == b'Ok':
+            result = True
+        return result
+
 
     @log
     def get_jim_message(self):
@@ -57,24 +86,6 @@ class ChatClient:
         message_time = time.gmtime(float(jim_message[KEY_TIME]))
         str_time = str(message_time.tm_hour) + ':' + str(message_time.tm_min)
         return user_from, message, str_time
-
-    # TODO: Delete if don't necessary
-    # @log
-    # def get_jim_response(self):
-    #     """
-    #     Receive server response
-    #     :return: Quantity of contacts or KEY_RESPONSE
-    #     """
-    #     jim_message = self.get_message()
-    #     if __debug__:
-    #         logging.info('Client: Get message from server - {}'.format(jim_message))
-    #     if jim_message[KEY_RESPONSE] == HTTP_CODE_ACCEPTED:
-    #         quantity = jim_message[KEY_QUANTITY]
-    #     elif jim_message[KEY_RESPONSE] == HTTP_CODE_OK:
-    #         return HTTP_CODE_OK
-    #     elif jim_message[KEY_RESPONSE] == HTTP_CODE_NOT_FOUND:
-    #         return jim_message[KEY_ALERT]
-    #     return quantity
 
     def send_add_del_contact(self, value, client):
         message = JIMMessage(value)
@@ -110,6 +121,8 @@ class ChatClient:
         code = server_message[KEY_RESPONSE]
         if code == HTTP_CODE_OK:
             result = True
+            if __debug__:
+                logging.info('Sent presence message to server. Received HTTP_OK from server')
         # elif code == HTTP_CODE_WRONG_ORDER:
         #     print(STR_ORDER_WITHOUT_PRESENCE)
         return result
