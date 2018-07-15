@@ -4,8 +4,8 @@
 
 import json
 
-from lib.config import *
-from lib import log_config
+from libchat.config import *
+from libchat import log_config
 
 
 def dict_to_bytes(dict_message):
