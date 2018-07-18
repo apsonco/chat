@@ -1,4 +1,4 @@
-# config.py
+# chat_config.py
 #
 # Configuration file for jim protocol use
 

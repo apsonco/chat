@@ -2,13 +2,12 @@
 # Classes for database
 
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
 
-# Clients table from lib.config.DB_PATH DB
+# Clients table from libchat.config.DB_PATH DB
 class Client(Base):
     __tablename__ = 'clients'
     id = Column(Integer, primary_key=True)
@@ -18,7 +17,7 @@ class Client(Base):
         self.name = name
 
 
-# Contacts table from lib.config.DB_PATH DB
+# Contacts table from libchat.config.DB_PATH DB
 class Contact(Base):
     __tablename__ = 'contacts'
     id = Column('id', Integer, primary_key=True)

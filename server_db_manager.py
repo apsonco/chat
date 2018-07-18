@@ -5,8 +5,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import logging
 
-from lib.config import DB_PATH
-from lib.log_config import log
+from libchat.chat_config import DB_PATH
+from libchat.log_config import log
 from db_model import Client, Contact
 
 

@@ -4,7 +4,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 
-from lib.config import DB_PATH
+from libchat.chat_config import DB_PATH
 
 
 def create_tables():

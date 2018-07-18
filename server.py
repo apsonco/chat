@@ -12,7 +12,7 @@
 import logging
 import sys
 
-from lib.config import *
+from libchat.chat_config import *
 
 from chat_server import ChatServer
 
