@@ -7,9 +7,9 @@ import select
 import os
 import hmac
 
-from lib import utils
-from lib.config import *
-from lib.log_config import log
+from libchat import utils
+from libchat.chat_config import *
+from libchat.log_config import log
 
 from jim.JIMResponse import JIMResponse
 

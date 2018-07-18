@@ -3,7 +3,7 @@ import sys
 from socket import socket, AF_INET, SOCK_STREAM
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 
-from chat_client import ChatClient
+from client.chat_client import ChatClient
 
 
 class SockHandler(QObject):

@@ -15,9 +15,9 @@ from socket import socket, AF_INET, SOCK_STREAM
 import logging
 from threading import Thread
 
-from chat_client import ChatClient
-from lib.config import *
-from lib.log_config import log
+from client.chat_client import ChatClient
+from libchat.chat_config import *
+from libchat.log_config import log
 
 
 class GetMessagesThread(Thread):

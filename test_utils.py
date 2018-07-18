@@ -4,7 +4,7 @@
 import json
 import socket
 
-from lib import utils, config
+from libchat import utils, chat_config
 
 import pytest
 
@@ -33,7 +33,7 @@ class TestCoding:
     # Test for correctness
     def test_dict_to_bytes(self):
         result_message = utils.dict_to_bytes(origin_json)
-        decoded_message = result_message.decode(config.CHARACTER_ENCODING)
+        decoded_message = result_message.decode(chat_config.CHARACTER_ENCODING)
         test_message = json.loads(decoded_message)
         assert origin_json == test_message
 
@@ -47,20 +47,20 @@ class TestMessages:
 
     def test_response_presence(self):
         mess = utils.response_presence()
-        assert config.KEY_RESPONSE in mess and config.KEY_TIME in mess and config.KEY_ALERT in mess
+        assert chat_config.KEY_RESPONSE in mess and chat_config.KEY_TIME in mess and chat_config.KEY_ALERT in mess
 
     def test_presence_message(self):
         mess = utils.presence_message('test_user')
-        assert config.KEY_ACTION in mess and config.KEY_TIME in mess and config.KEY_TYPE in mess \
-               and config.KEY_USER in mess
+        assert chat_config.KEY_ACTION in mess and chat_config.KEY_TIME in mess and chat_config.KEY_TYPE in mess \
+               and chat_config.KEY_USER in mess
 
     def test_presence_message_key_action(self):
         mess = utils.presence_message()
-        assert mess[config.KEY_ACTION] == config.VALUE_PRESENCE
+        assert mess[chat_config.KEY_ACTION] == chat_config.VALUE_PRESENCE
 
     def test_presence_message_default_user(self):
         mess = utils.presence_message()
-        assert mess[config.KEY_USER][config.KEY_ACCOUNT_NAME] == config.VALUE_DEFAULT_USER
+        assert mess[chat_config.KEY_USER][chat_config.KEY_ACCOUNT_NAME] == chat_config.VALUE_DEFAULT_USER
 
     def test_presence_message_type(self):
         with pytest.raises(TypeError):
@@ -81,9 +81,9 @@ class ClientSocket():
 
     def recv(self, n):
         #   Will send the same answer for socket
-        message = {config.KEY_RESPONSE: config.HTTP_CODE_OK}
+        message = {chat_config.KEY_RESPONSE: chat_config.HTTP_CODE_OK}
         jmessage = json.dumps(message)
-        bmessage = jmessage.encode(config.CHARACTER_ENCODING)
+        bmessage = jmessage.encode(chat_config.CHARACTER_ENCODING)
         return bmessage
 
     def send(self, bmessage):
@@ -96,7 +96,7 @@ def test_get_message(monkeypatch):
     monkeypatch.setattr("socket.socket", ClientSocket)
     # Create socket that changed already
     sock = socket.socket()
-    assert utils.get_message(sock) == {config.KEY_RESPONSE: config.HTTP_CODE_OK}
+    assert utils.get_message(sock) == {chat_config.KEY_RESPONSE: chat_config.HTTP_CODE_OK}
 
 
 def test_send_message(monkeypatch):

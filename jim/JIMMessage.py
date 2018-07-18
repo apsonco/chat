@@ -3,8 +3,7 @@
 
 import time
 
-from lib.config import *
-from lib import utils
+from libchat.chat_config import *
 
 
 class JIMMessage:
@@ -37,7 +36,7 @@ class JIMMessage:
 
     # Create presence message
     @staticmethod
-    def presence_message(user_name):
+    def presence_message(user_name=VALUE_DEFAULT_USER):
         """
             Creates client presence message and returns it in JSON
             :param user_name: str - user name, should be less than 25 characters
@@ -46,7 +45,7 @@ class JIMMessage:
         if not isinstance(user_name, str):
             raise TypeError
         if len(user_name) > 25:
-            raise utils.UsernameTooLongError(user_name)
+            raise UsernameTooLongError(user_name)
         # Time in seconds since the epoch as a floating point number
         current_time = time.time()
         result = {KEY_ACTION: VALUE_PRESENCE,
@@ -105,3 +104,14 @@ class JIMMessage:
                       KEY_STATUS: STR_QUIT
                   }}
         return result
+
+# Messages
+
+
+# Error type for checking string length
+class UsernameTooLongError(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+    def __str__(self, username):
+        return 'User name {} must be less than 26 characters'.format(username)

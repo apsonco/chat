@@ -3,8 +3,8 @@
 
 import time
 
-from lib.config import *
-from lib import log_config
+from libchat.chat_config import *
+from libchat import log_config
 
 
 class JIMResponse:

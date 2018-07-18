@@ -4,8 +4,8 @@
 
 import json
 
-from libchat.config import *
-from libchat import log_config
+from libchat.chat_config import *
+from libchat.log_config import log
 
 
 def dict_to_bytes(dict_message):
@@ -19,7 +19,7 @@ def dict_from_bytes(byte_str):
     return result
 
 
-@log_config.log
+@log
 def send_message(web_socket, dict_message):
     """
         Sends binary socket message
@@ -33,7 +33,7 @@ def send_message(web_socket, dict_message):
     web_socket.send(result)
 
 
-# @log_config.logging_dec
+@log
 def get_message(web_socket):
     """
         Gets binary socket message and returns dictionary
@@ -44,15 +44,4 @@ def get_message(web_socket):
     result = dict_from_bytes(byte_str)
     return result
 
-
-# Messages
-
-
-# Error type for checking string length
-class UsernameTooLongError(Exception):
-    def __init__(self, *args, **kwargs):
-        Exception.__init__(self, *args, **kwargs)
-
-    def __str__(self, username):
-        return 'User name {} must be less than 26 characters'.format(username)
 
