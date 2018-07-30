@@ -34,6 +34,19 @@ class Contacts(Base):
         self.friend_id = friend_id
 
 
+class History(Base):
+    __tablename__ = 'history'
+    id = Column(Integer, primary_key=True)
+    client_id = Column(Integer, ForeignKey(Clients.id))
+    login_time = Column(String(25))
+    ip = Column(String(15))
+
+    def __init__(self, client_id, login_time, ip):
+        self.client_id = client_id
+        self.login_time = login_time
+        self.ip = ip
+
+
 class TestDb:
     def test_db_client(self):
 
@@ -82,3 +95,26 @@ class TestDb:
         Contacts.__table__.drop(engine)
 
         assert result_contact_id == result_client_id
+
+    def test_db_history(self):
+        db_init.create_tables()
+
+        engine = create_engine('sqlite:///srv_chat.db', echo=True)
+        # Create session
+        Session = sessionmaker(bind=engine)
+        # Class session creates new objects which bind with data base
+        session = Session()
+        # Need add User class object to session for storing it
+        guest_client = Clients(GUEST)
+
+        session.add(guest_client)
+        session.commit()
+
+        history_row = History(guest_client.id, '18:00:25', '192.168.220.29')
+        session.add(history_row)
+        session.commit()
+
+        result_client_id = session.query(Clients).first().id
+        result_history = session.query(History).filter_by(client_id=result_client_id).first()
+
+        assert history_row.id == result_history.id
