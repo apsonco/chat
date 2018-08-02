@@ -27,13 +27,20 @@ class ChatServer:
         self.r_list = []
         self.e_list = []
         # TODO: Rewrite code that dosen't need use clients_dict
-        self.clients_dict = {} # Has format {'client_name': WebSocket}
-        self.clients_names = {} # Has forma {WebSocket: 'client_name'}
+        self.clients_dict = {}  # Has format {'client_name': WebSocket}
+        self.clients_names = {}  # Has format {WebSocket: 'client_name'}
 
     def add_client(self, client, user_name):
         self.clients.append(client)
         self.clients_dict[user_name] = client
         self.clients_names[client] = user_name
+        # Add user login history
+        db_manager = ServerDbManager()
+        res = db_manager.add_login_history(client.getpeername()[0], user_name)
+        if res is True:
+            logging.info('{}''s login history successfully added'.format(user_name))
+        else:
+            logging.info('{}''s error in adding to login history'.format(user_name))
 
     # Creates socket, sets connection number, sets timeout
     def connect(self):

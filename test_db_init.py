@@ -48,6 +48,12 @@ class History(Base):
 
 
 class TestDb:
+    @staticmethod
+    def delete_tables(engine):
+        Clients.__table__.drop(engine)
+        Contacts.__table__.drop(engine)
+        History.__table__.drop(engine)
+
     def test_db_client(self):
 
         db_init.create_tables()
@@ -64,8 +70,7 @@ class TestDb:
         session.commit()
         result_client = session.query(Clients).first().name
 
-        Clients.__table__.drop(engine)
-        Contacts.__table__.drop(engine)
+        self.delete_tables(engine)
 
         assert result_client == GUEST
 
@@ -91,8 +96,7 @@ class TestDb:
         result_contact = session.query(Contacts).filter_by(owner_id=owner_client.id).first()
         result_contact_id = result_contact.id
 
-        Clients.__table__.drop(engine)
-        Contacts.__table__.drop(engine)
+        self.delete_tables(engine)
 
         assert result_contact_id == result_client_id
 
@@ -116,5 +120,7 @@ class TestDb:
 
         result_client_id = session.query(Clients).first().id
         result_history = session.query(History).filter_by(client_id=result_client_id).first()
+
+        self.delete_tables(engine)
 
         assert history_row.id == result_history.id
