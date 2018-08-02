@@ -27,3 +27,17 @@ class Contact(Base):
     def __init__(self, owner_id, friend_id):
         self.owner_id = owner_id
         self.friend_id = friend_id
+
+
+# History table from libchat.config.DB_PATH DB
+class History(Base):
+    __tablename__ = 'history'
+    id = Column(Integer, primary_key=True)
+    client_id = Column(Integer, ForeignKey(Client.id))
+    login_time = Column(String(25))
+    ip = Column(String(15))
+
+    def __init__(self, client_id, login_time, ip):
+        self.client_id = client_id
+        self.login_time = login_time
+        self.ip = ip

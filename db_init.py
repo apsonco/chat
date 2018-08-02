@@ -16,8 +16,15 @@ def create_tables():
 
     contact_table = Table("contacts", metadata,
                           Column("id", Integer, primary_key=True),
-                          Column("owner_id", Integer, ForeignKey('clients.id')), #clients_table.c.id)),
-                          Column("friend_id", Integer, ForeignKey('clients.id')) #clients_table.c.id))
+                          Column("owner_id", Integer, ForeignKey('clients.id')),
+                          Column("friend_id", Integer, ForeignKey('clients.id'))
+                          )
+
+    history_table = Table("history", metadata,
+                          Column("id", Integer, primary_key=True),
+                          Column("client_id", Integer, ForeignKey('clients.id')),
+                          Column("login_time", String(25)),
+                          Column("ip", String(15))
                           )
     engine = create_engine('sqlite:///' + DB_PATH, echo=True)
     metadata.create_all(engine)

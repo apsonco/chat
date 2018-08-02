@@ -4,10 +4,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import logging
+import time
 
 from libchat.chat_config import DB_PATH
 from libchat.log_config import log
-from db_model import Client, Contact
+from db_model import Client, Contact, History
 
 
 class ServerDbManager:
@@ -115,4 +116,29 @@ class ServerDbManager:
             logging.info('Del_contact. Session committed')
             result = True
         return result
+
+    @log
+    def add_login_history(self, ip, client_name):
+        """
+        Add login history to data base. Stores user name, time and ip address.
+        :param ip: Client's ip address
+        :param client_name: user name
+        :return: True if information successfully stored, else - otherwise.
+        """
+        result = True
+        print('{}''s ip address is {}'.format(client_name, ip))
+        client_id = self.find_by_name(client_name)
+        if client_id == -1:
+            result = False
+        else:
+            str_time = time.asctime(time.localtime())
+            new_history = History(client_id=client_id, login_time=str_time, ip=ip)
+            logging.info('Add_history. Created new_history {}'.format(new_history))
+            self.session.add(new_history)
+            logging.info('Add_history. History added to session')
+            self.session.commit()
+            logging.info('Add_history. Session committed')
+
+        return result
+
 
