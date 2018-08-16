@@ -68,7 +68,6 @@ class ChatClient:
             result = True
         return result
 
-
     @log
     def get_jim_message(self):
         # TODO: Should rewrite because we use threads in client for receiving messages

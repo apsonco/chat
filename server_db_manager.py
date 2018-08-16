@@ -8,7 +8,7 @@ import time
 
 from libchat.chat_config import DB_PATH
 from libchat.log_config import log
-from db_model import Client, Contact, History
+from db_model import Client, Contact, HistoryLogin
 
 
 class ServerDbManager:
@@ -132,7 +132,7 @@ class ServerDbManager:
             result = False
         else:
             str_time = time.asctime(time.localtime())
-            new_history = History(client_id=client_id, login_time=str_time, ip=ip)
+            new_history = HistoryLogin(client_id=client_id, login_time=str_time, ip=ip)
             logging.info('Add_history. Created new_history {}'.format(new_history))
             self.session.add(new_history)
             logging.info('Add_history. History added to session')

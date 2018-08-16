@@ -1,7 +1,7 @@
 # db_model.py
 # Classes for database
 
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -30,8 +30,8 @@ class Contact(Base):
 
 
 # History table from libchat.config.DB_PATH DB
-class History(Base):
-    __tablename__ = 'history'
+class HistoryLogin(Base):
+    __tablename__ = 'history_login'
     id = Column(Integer, primary_key=True)
     client_id = Column(Integer, ForeignKey(Client.id))
     login_time = Column(String(25))
@@ -41,3 +41,19 @@ class History(Base):
         self.client_id = client_id
         self.login_time = login_time
         self.ip = ip
+
+
+# Message history table from libchat.config.DB_PATH DB
+class MSHistory(Base):
+    __tablename__ = 'history_ms'
+    id = Column(Integer, primary_key=True)
+    sender_id = Column(Integer, ForeignKey(Client.id))
+    receiver_id = Column(Integer, ForeignKey(Client.id))
+    ms_time = Column(Float)
+    message = Column(String(500))
+
+    def __init__(self, sender_id, receiver_id, ms_time, message):
+        self.sender_id = sender_id
+        self.ms_time = ms_time
+        self.receiver_id = receiver_id
+        self.message = message

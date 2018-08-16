@@ -9,7 +9,7 @@ import hmac
 
 from libchat import utils
 from libchat.chat_config import *
-from libchat import log_config
+from libchat.log_config import log
 
 from jim.JIMResponse import JIMResponse
 
@@ -30,6 +30,7 @@ class ChatServer:
         self.clients_dict = {}  # Has format {'client_name': WebSocket}
         self.clients_names = {}  # Has format {WebSocket: 'client_name'}
 
+    @log
     def add_client(self, client, user_name):
         self.clients.append(client)
         self.clients_dict[user_name] = client
@@ -92,7 +93,7 @@ class ChatServer:
                 requests = self.read_requests(self.r_list)
                 self.write_responses(requests, self.w_list)
 
-    @log_config.log
+    @log
     def parse_request(self, data, sock):
         """
         Parse type of input service message and call equivalent function
@@ -110,7 +111,7 @@ class ChatServer:
             logging.info('Have got _{}_ message from {}'.format(VALUE_ADD_CONTACT, self.clients_names[sock]))
             self.del_contact(data[KEY_USER_ID], sock)
 
-    @log_config.log
+    @log
     def send_contacts(self, client_name, sock):
         """
         Extract client_name contact list from database and send it to client_name
