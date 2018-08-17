@@ -1,4 +1,4 @@
-# server_db_manager.py
+# server_db_adapter.py
 # ClientManager class is responsible for storing and getting info from data base
 
 from sqlalchemy import create_engine
@@ -11,7 +11,7 @@ from libchat.log_config import log
 from db_model import Client, Contact, HistoryLogin
 
 
-class ServerDbManager:
+class ServerDbAdapter:
     """
     Class for handling information in data base
     """
@@ -138,7 +138,18 @@ class ServerDbManager:
             logging.info('Add_history. History added to session')
             self.session.commit()
             logging.info('Add_history. Session committed')
+        return result
 
+    @log
+    def store_message(self, user_from, user_to, key_time, message):
+        """
+        Add message to data base. Stores user from id, user to id, time, and messages
+        :param user_from:
+        :param user_to:
+        :param message:
+        :return:
+        """
+        result = True
         return result
 
 
