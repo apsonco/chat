@@ -183,11 +183,10 @@ class ChatServer:
         utils.send_message(sock, server_message)
 
     @staticmethod
-    def write_message_history(self, data):
+    def write_message_history(data):
         """
         Write message into database
-        :param contact_name:
-        :param sock:
+        :param data:
         :return: nothing
         """
         db_adapter = ServerDbAdapter()
@@ -206,7 +205,7 @@ class ChatServer:
             try:
                 logging.info('RR function Try to get message from {} {}'.format(sock.fileno(), sock.getpeername()))
                 data = utils.get_message(sock)
-                logging.info('RR funсtion JSON message is: {}'.format(data))
+                logging.info('RR function JSON message is: {}'.format(data))
                 responses[sock] = data
                 # function for parse service messages
                 self.parse_request(data, sock)

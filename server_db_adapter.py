@@ -8,7 +8,7 @@ import time
 
 from libchat.chat_config import DB_PATH
 from libchat.log_config import log
-from db_model import Client, Contact, HistoryLogin
+from db_model import Client, Contact, HistoryLogin, MSHistory
 
 
 class ServerDbAdapter:
@@ -146,10 +146,22 @@ class ServerDbAdapter:
         Add message to data base. Stores user from id, user to id, time, and messages
         :param user_from:
         :param user_to:
+        :param key_time:
         :param message:
-        :return:
+        :return: True if information successfully stored, else - otherwise.
         """
         result = True
+        user_from_id = self.find_by_name(user_from)
+        user_to_id = self.find_by_name(user_to)
+        if user_from_id == -1 or user_to_id == -1:
+            result = False
+        else:
+            try:
+                new_ms_history = MSHistory(user_from_id, user_to_id, key_time, message)
+                self.session.add(new_ms_history)
+                self.session.commit()
+            except:
+                result = False
         return result
 
 
