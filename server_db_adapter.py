@@ -1,4 +1,4 @@
-# server_db_manager.py
+# server_db_adapter.py
 # ClientManager class is responsible for storing and getting info from data base
 
 from sqlalchemy import create_engine
@@ -8,10 +8,10 @@ import time
 
 from libchat.chat_config import DB_PATH
 from libchat.log_config import log
-from db_model import Client, Contact, History
+from db_model import Client, Contact, HistoryLogin, MSHistory
 
 
-class ServerDbManager:
+class ServerDbAdapter:
     """
     Class for handling information in data base
     """
@@ -132,13 +132,36 @@ class ServerDbManager:
             result = False
         else:
             str_time = time.asctime(time.localtime())
-            new_history = History(client_id=client_id, login_time=str_time, ip=ip)
+            new_history = HistoryLogin(client_id=client_id, login_time=str_time, ip=ip)
             logging.info('Add_history. Created new_history {}'.format(new_history))
             self.session.add(new_history)
             logging.info('Add_history. History added to session')
             self.session.commit()
             logging.info('Add_history. Session committed')
+        return result
 
+    @log
+    def store_message(self, user_from, user_to, key_time, message):
+        """
+        Add message to data base. Stores user from id, user to id, time, and messages
+        :param user_from:
+        :param user_to:
+        :param key_time:
+        :param message:
+        :return: True if information successfully stored, else - otherwise.
+        """
+        result = True
+        user_from_id = self.find_by_name(user_from)
+        user_to_id = self.find_by_name(user_to)
+        if user_from_id == -1 or user_to_id == -1:
+            result = False
+        else:
+            try:
+                new_ms_history = MSHistory(user_from_id, user_to_id, key_time, message)
+                self.session.add(new_ms_history)
+                self.session.commit()
+            except:
+                result = False
         return result
 
 

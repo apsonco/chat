@@ -1,5 +1,7 @@
 # JIMMessage.py
 # Class for message which support jim protocol
+# JSON should has length less than 600 characters
+# final message should be less than 500 characters
 
 import time
 

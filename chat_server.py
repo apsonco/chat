@@ -9,11 +9,11 @@ import hmac
 
 from libchat import utils
 from libchat.chat_config import *
-from libchat import log_config
+from libchat.log_config import log
 
 from jim.JIMResponse import JIMResponse
 
-from server_db_manager import ServerDbManager
+from server_db_adapter import ServerDbAdapter
 
 
 class ChatServer:
@@ -26,16 +26,17 @@ class ChatServer:
         self.w_list = []
         self.r_list = []
         self.e_list = []
-        # TODO: Rewrite code that dosen't need use clients_dict
+        # TODO: Rewrite code that doesn't need use clients_dict
         self.clients_dict = {}  # Has format {'client_name': WebSocket}
         self.clients_names = {}  # Has format {WebSocket: 'client_name'}
 
+    @log
     def add_client(self, client, user_name):
         self.clients.append(client)
         self.clients_dict[user_name] = client
         self.clients_names[client] = user_name
         # Add user login history
-        db_manager = ServerDbManager()
+        db_manager = ServerDbAdapter()
         res = db_manager.add_login_history(client.getpeername()[0], user_name)
         if res is True:
             logging.info('{}''s login history successfully added'.format(user_name))
@@ -92,7 +93,7 @@ class ChatServer:
                 requests = self.read_requests(self.r_list)
                 self.write_responses(requests, self.w_list)
 
-    @log_config.log
+    @log
     def parse_request(self, data, sock):
         """
         Parse type of input service message and call equivalent function
@@ -109,8 +110,13 @@ class ChatServer:
         elif data[KEY_ACTION] == VALUE_DEL_CONTACT:
             logging.info('Have got _{}_ message from {}'.format(VALUE_ADD_CONTACT, self.clients_names[sock]))
             self.del_contact(data[KEY_USER_ID], sock)
+        elif data[KEY_ACTION] == VALUE_MESSAGE:
+            logging.info('Have got _{}_ message from _{}_ to _{}_'.format(data[KEY_MESSAGE], data[KEY_FROM], data[KEY_TO]))
+            if self.write_message_history(data) is False:
+                pass
+                # TODO: Handle case when message didn't store to database
 
-    @log_config.log
+    @log
     def send_contacts(self, client_name, sock):
         """
         Extract client_name contact list from database and send it to client_name
@@ -118,8 +124,8 @@ class ChatServer:
         :param sock: Client socket
         :return:
         """
-        db_manager = ServerDbManager()
-        contact_list = db_manager.get_contacts(client_name)
+        db_adapter = ServerDbAdapter()
+        contact_list = db_adapter.get_contacts(client_name)
         logging.info('contact_list is {}'.format(contact_list))
         response = JIMResponse(HTTP_CODE_ACCEPTED, len(contact_list))
 
@@ -142,8 +148,8 @@ class ChatServer:
         :param sock:
         :return:
         """
-        db_manager = ServerDbManager()
-        res = db_manager.add_contact(self.clients_names[sock], contact_name)
+        db_adapter = ServerDbAdapter()
+        res = db_adapter.add_contact(self.clients_names[sock], contact_name)
         if res is True:
             response = JIMResponse()
             server_message = response.get_jim_response()
@@ -160,20 +166,32 @@ class ChatServer:
         Delete contact from database and send message with code to client
         :param contact_name:
         :param sock:
-        :return:
+        :return: nothing
         """
-        db_manager = ServerDbManager()
-        res = db_manager.del_contact(self.clients_names[sock], contact_name)
+        db_adapter = ServerDbAdapter()
+        res = db_adapter.del_contact(self.clients_names[sock], contact_name)
         if res is True:
             response = JIMResponse()
             server_message = response.get_jim_response()
         else:
+            # TODO: This method must return OK or Error and mustn't send messages via socket
             # if contact doesn't exist or other issues with data base
             response = JIMResponse()
             server_message = response.response_error(HTTP_CODE_NOT_FOUND,
                                                      'contact doesnt exist or other issues with data base')
         logging.info('response contact list JSON: {}'.format(server_message))
         utils.send_message(sock, server_message)
+
+    @staticmethod
+    def write_message_history(data):
+        """
+        Write message into database
+        :param data:
+        :return: nothing
+        """
+        db_adapter = ServerDbAdapter()
+        result = db_adapter.store_message(data[KEY_FROM], data[KEY_TO], data[KEY_TIME], data[KEY_MESSAGE])
+        return result
 
     def read_requests(self, read_clients):
         """
@@ -187,7 +205,7 @@ class ChatServer:
             try:
                 logging.info('RR function Try to get message from {} {}'.format(sock.fileno(), sock.getpeername()))
                 data = utils.get_message(sock)
-                logging.info('RR funсtion JSON message is: {}'.format(data))
+                logging.info('RR function JSON message is: {}'.format(data))
                 responses[sock] = data
                 # function for parse service messages
                 self.parse_request(data, sock)
@@ -259,7 +277,7 @@ class ChatServer:
         utils.send_message(client, server_message)
 
         # Storing user to data base
-        cl_manager = ServerDbManager()
+        cl_manager = ServerDbAdapter()
         cl_manager.add_client(client_message[KEY_USER][KEY_ACCOUNT_NAME])
 
         return result, client_name
