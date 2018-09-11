@@ -95,8 +95,9 @@ class ChatClient:
         message = JIMMessage(value_msg, self.user_name, user_to)
         jim_message = message.create_jim_message(msg)
         self.send_message(jim_message)
-        message_time = time.gmtime(float(jim_message[KEY_TIME]))
-        return str(message_time.tm_hour) + ':' + str(message_time.tm_min)
+        return utils.light_time(jim_message[KEY_TIME])
+        #message_time = time.gmtime(float(jim_message[KEY_TIME]))
+        #return str(message_time.tm_hour) + ':' + str(message_time.tm_min)
 
     def check_presence(self):
         """

@@ -3,6 +3,7 @@
 # Utils for serve date transmission via socket
 
 import json
+import time
 
 from libchat.chat_config import *
 from libchat.log_config import log
@@ -43,5 +44,15 @@ def get_message(web_socket):
     byte_str = web_socket.recv(1024)
     result = dict_from_bytes(byte_str)
     return result
+
+
+def light_time(str_time):
+    """
+        Converts sting which value is current time in seconds since the Epoch to HH:MM string
+        :param str_time: result of time.time()
+        :return: string with time in format HH:MM
+    """
+    message_time = time.gmtime(float(str_time))
+    return '{:02}'.format(message_time.tm_hour) + ':' + '{:02}'.format(message_time.tm_min)
 
 

@@ -8,6 +8,7 @@ from threading import Thread
 from client.chat_client import ChatClient
 from libchat.chat_config import *
 from libchat.log_config import log
+from libchat import utils
 
 
 class GetMessagesThread(Thread):
@@ -36,7 +37,7 @@ class GetMessagesThread(Thread):
                     window.chats[user_from].append({str_time: message})
                 else:
                     window.chats[user_from] = ({str_time: message},)
-                window.listWidgetMessages.addItem(str(str_time) + ' ' + user_from + ' >>' + message)
+                window.listWidgetMessages.addItem(utils.light_time(str_time) + ' ' + user_from + ' > ' + message)
             else:
                 window.chat_client.request_queue.put(jim_message)
                 window.chat_client.request_queue.task_done()
