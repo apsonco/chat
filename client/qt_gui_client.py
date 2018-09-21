@@ -36,6 +36,7 @@ class GetMessagesThread(Thread):
                     logging.info('Have found user {} in contacts '.format(user_from))
                     window.chats[user_from].append({str_time: message})
                 else:
+                    # Received first message from user_from
                     window.chats[user_from] = ({str_time: message},)
                 window.listWidgetMessages.addItem(utils.light_time(str_time) + ' ' + user_from + ' > ' + message)
             else:
@@ -61,6 +62,8 @@ class MyWindow(QtWidgets.QMainWindow):
 
         self.pushButtonConnect.clicked.connect(self.on_button_connect_clicked)
         self.pushButtonSend.clicked.connect(self.on_button_send_clicked)
+
+        self.listWidgetContacts.currentItemChanged.connect(self.contacts_current_item_changed)
 
         self.sock = None
         self.get_thread = None
@@ -90,6 +93,8 @@ class MyWindow(QtWidgets.QMainWindow):
             self.get_thread.start()
             contacts = self.chat_client.get_contacts()
             self.listWidgetContacts.addItems(contacts)
+            for item in contacts:
+                self.chats[item] = [{0: ''}]
 
     def on_button_send_clicked(self):
         message_text = self.lineEditMessage.displayText()
@@ -99,6 +104,12 @@ class MyWindow(QtWidgets.QMainWindow):
             final_message = str(message_time) + ' ' + message_text
             self.listWidgetMessages.addItem(final_message)
             self.lineEditMessage.setText('')
+
+    def contacts_current_item_changed(self):
+        user_to = self.listWidgetContacts.currentItem().text()
+        print('current item: {}'.format(user_to))
+        for item in self.chats[user_to]:
+            print(item)
 
 
 if __name__ == '__main__':
