@@ -40,7 +40,9 @@ class GetMessagesThread(Thread):
                     # Received first message from user_from
                     # TODO: Should change to .append
                     window.chats[user_from] = [(1, str_time, message)]
-                window.listWidgetMessages.addItem(str_time + ' ' + user_from + ' > ' + message)
+                # if we have received message from current contact item
+                if user_from == window.listWidgetContacts.currentItem().text():
+                    window.listWidgetMessages.addItem(str_time + ' ' + user_from + ' > ' + message)
             else:
                 window.chat_client.request_queue.put(jim_message)
                 window.chat_client.request_queue.task_done()
@@ -72,6 +74,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.chat_client = None
 
         self.chats = {}
+        self.previous_contact_item = ''
 
     def finished(self):
         self.get_thread.stop()
@@ -96,7 +99,8 @@ class MyWindow(QtWidgets.QMainWindow):
             contacts = self.chat_client.get_contacts()
             self.listWidgetContacts.addItems(contacts)
             for item in contacts:
-                self.chats[item] = [(0, 0, '')]
+                # first item should be 2 for skiping firs item in contacts_current_item_changed function
+                self.chats[item] = [(2, 0, '')]
 
     def on_button_send_clicked(self):
         message_text = self.lineEditMessage.displayText()
@@ -116,9 +120,19 @@ class MyWindow(QtWidgets.QMainWindow):
 
     def contacts_current_item_changed(self):
         user_to = self.listWidgetContacts.currentItem().text()
-        print('current item: {}'.format(user_to))
-        for item in self.chats[user_to]:
-            print(item)
+        logging.info('current item: {}'.format(user_to))
+        if self.previous_contact_item != user_to:
+            self.listWidgetMessages.clear()
+            for item in self.chats[user_to]:
+                if item[0] is 0:
+                    final_message = str(item[1]) + ' ' + item[2]
+                else:
+                    final_message = str(item[1]) + ' ' + user_to + ' > ' + item[2]
+                if item[0] != 2:
+                        self.listWidgetMessages.addItem(final_message)
+                logging.info(item)
+
+        self.previous_contact_item = user_to
 
 
 if __name__ == '__main__':
