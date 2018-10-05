@@ -15,7 +15,7 @@ from jim.JIMMessage import JIMMessage
 
 class ChatClient:
 
-    def __init__(self, server_address, port, user_name):
+    def __init__(self, server_address='localhost', port='5335', user_name='username'):
         self.server_address = server_address
         self.port = port
         self.sock = None
