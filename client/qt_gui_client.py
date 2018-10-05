@@ -64,17 +64,18 @@ class MyWindow(QtWidgets.QMainWindow):
         self.pushButton.clicked.connect(QtWidgets.qApp.quit)
         self.setWindowTitle('Chat client: ' + user_name)
 
-        self.pushButtonConnect.clicked.connect(self.on_button_connect_clicked)
-        self.pushButtonSend.clicked.connect(self.on_button_send_clicked)
-
-        self.listWidgetContacts.currentItemChanged.connect(self.contacts_current_item_changed)
-
         self.sock = None
         self.get_thread = None
         self.chat_client = None
 
         self.chats = {}
         self.previous_contact_item = ''
+
+        self.pushButtonConnect.clicked.connect(self.on_button_connect_clicked)
+        self.pushButtonSend.clicked.connect(self.on_button_send_clicked)
+        self.pushButtonAddContact.clicked.connect(self.on_button_add_contact_clicked)
+
+        self.listWidgetContacts.currentItemChanged.connect(self.contacts_current_item_changed)
 
     def finished(self):
         self.get_thread.stop()
@@ -99,7 +100,7 @@ class MyWindow(QtWidgets.QMainWindow):
             contacts = self.chat_client.get_contacts()
             self.listWidgetContacts.addItems(contacts)
             for item in contacts:
-                # first item should be 2 for skiping firs item in contacts_current_item_changed function
+                # first item should be 2 for skipping first item in contacts_current_item_changed function
                 self.chats[item] = [(2, 0, '')]
 
     def on_button_send_clicked(self):
@@ -117,6 +118,16 @@ class MyWindow(QtWidgets.QMainWindow):
             else:
                 # Received first message from user_from
                 window.chats[user_to] = ((0, message_time, message_text),)
+
+    def on_button_add_contact_clicked(self):
+        contact_name = self.addContactName.displayText()
+        if contact_name != '':
+            result = self.chat_client.add_contact(contact_name)
+            if result is True:
+                self.listWidgetContacts.addItem(contact_name)
+            else:
+                logging.info('Add contact return False')
+            self.addContactName.clear()
 
     def contacts_current_item_changed(self):
         user_to = self.listWidgetContacts.currentItem().text()

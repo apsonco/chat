@@ -10,6 +10,12 @@
     <height>393</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Chat client</string>
   </property>
@@ -18,9 +24,9 @@
     <property name="geometry">
      <rect>
       <x>460</x>
-      <y>70</y>
-      <width>113</width>
-      <height>34</height>
+      <y>66</y>
+      <width>121</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -31,7 +37,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>50</y>
+      <y>42</y>
       <width>60</width>
       <height>16</height>
      </rect>
@@ -44,9 +50,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
+      <y>60</y>
       <width>151</width>
-      <height>261</height>
+      <height>271</height>
      </rect>
     </property>
    </widget>
@@ -64,9 +70,9 @@
     <property name="geometry">
      <rect>
       <x>460</x>
-      <y>300</y>
-      <width>113</width>
-      <height>32</height>
+      <y>296</y>
+      <width>121</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -77,9 +83,9 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>70</y>
+      <y>60</y>
       <width>301</width>
-      <height>231</height>
+      <height>241</height>
      </rect>
     </property>
    </widget>
@@ -87,7 +93,7 @@
     <property name="geometry">
      <rect>
       <x>170</x>
-      <y>50</y>
+      <y>42</y>
       <width>60</width>
       <height>16</height>
      </rect>
@@ -99,10 +105,10 @@
    <widget class="QPushButton" name="pushButtonConnect">
     <property name="geometry">
      <rect>
-      <x>164</x>
+      <x>156</x>
       <y>14</y>
       <width>93</width>
-      <height>34</height>
+      <height>32</height>
      </rect>
     </property>
     <property name="text">
@@ -125,11 +131,53 @@
    <widget class="QLineEdit" name="userName">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>151</width>
+      <x>12</x>
+      <y>18</y>
+      <width>142</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>0</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add contact</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="addContactName">
+    <property name="geometry">
+     <rect>
+      <x>259</x>
+      <y>18</y>
+      <width>142</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonAddContact">
+    <property name="geometry">
+     <rect>
+      <x>403</x>
+      <y>14</y>
+      <width>67</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add</string>
     </property>
    </widget>
   </widget>
