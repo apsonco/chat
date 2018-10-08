@@ -69,11 +69,12 @@ class MyWindow(QtWidgets.QMainWindow):
         self.chat_client = None
 
         self.chats = {}
-        self.previous_contact_item = ''
+        self.previous_contact_item = None
 
         self.pushButtonConnect.clicked.connect(self.on_button_connect_clicked)
         self.pushButtonSend.clicked.connect(self.on_button_send_clicked)
         self.pushButtonAddContact.clicked.connect(self.on_button_add_contact_clicked)
+        self.pushButtonDeleteContact.clicked.connect(self.on_button_delete_contact_clicked)
 
         self.listWidgetContacts.currentItemChanged.connect(self.contacts_current_item_changed)
 
@@ -129,10 +130,20 @@ class MyWindow(QtWidgets.QMainWindow):
                 logging.info('Add contact return False')
             self.addContactName.clear()
 
+    def on_button_delete_contact_clicked(self):
+        contact_name = self.listWidgetContacts.currentItem().text()
+        if contact_name != '':
+            result = self.chat_client.del_contact(contact_name)
+            if result is True:
+                self.listWidgetContacts.takeItem(self.listWidgetContacts.row(self.listWidgetContacts.currentItem()))
+            else:
+                logging.info('Delete contact return False')
+        pass
+
     def contacts_current_item_changed(self):
         user_to = self.listWidgetContacts.currentItem().text()
         logging.info('current item: {}'.format(user_to))
-        if self.previous_contact_item != user_to:
+        if self.previous_contact_item and self.previous_contact_item != user_to:
             self.listWidgetMessages.clear()
             for item in self.chats[user_to]:
                 if item[0] is 0:
