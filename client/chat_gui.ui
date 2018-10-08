@@ -180,6 +180,19 @@
      <string>Add</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButtonDeleteContact">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>100</y>
+      <width>121</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delete contact</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
