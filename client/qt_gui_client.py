@@ -126,6 +126,8 @@ class MyWindow(QtWidgets.QMainWindow):
             result = self.chat_client.add_contact(contact_name)
             if result is True:
                 self.listWidgetContacts.addItem(contact_name)
+                # create history for this contact
+                self.chats[contact_name] = [(2, 0, '')]
             else:
                 logging.info('Add contact return False')
             self.addContactName.clear()
