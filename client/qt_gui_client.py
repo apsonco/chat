@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets, QtGui, uic, QtCore
 from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
 
@@ -9,6 +9,8 @@ from client.chat_client import ChatClient
 from libchat.chat_config import *
 from libchat.log_config import log
 from libchat import utils
+
+UNREAD_COLOR = '#fdc086'
 
 
 class GetMessagesThread(Thread):
@@ -43,6 +45,12 @@ class GetMessagesThread(Thread):
                 # if we have received message from current contact item
                 if user_from == window.listWidgetContacts.currentItem().text():
                     window.listWidgetMessages.addItem(str_time + ' ' + user_from + ' > ' + message)
+                else:
+                    items = window.listWidgetContacts.findItems(user_from, QtCore.Qt.MatchExactly)
+                    if len(items) > 0:
+                        for item in items:
+                            item.setBackground(QtGui.QColor(UNREAD_COLOR))
+                    #window.highlight_contact(user_from)
             else:
                 window.chat_client.request_queue.put(jim_message)
                 window.chat_client.request_queue.task_done()
@@ -157,6 +165,19 @@ class MyWindow(QtWidgets.QMainWindow):
                 logging.info(item)
 
         self.previous_contact_item = user_to
+
+    def highlight_contact(self, user_from):
+        """
+        Finds item by name in contact list and highlights it.
+        Use this method for new messages.
+        :param user_from: Contact name
+        :return:
+        """
+        logging.info('change background in list')
+        items = self.listWidgetContacts.findItems(user_from, QtCore.Qt.MatchExactly)
+        if len(items) > 0:
+            for item in items:
+                item.setBackground(QtGui.QColor(UNREAD_COLOR))
 
 
 if __name__ == '__main__':
