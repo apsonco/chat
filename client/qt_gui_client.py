@@ -2,15 +2,13 @@ import sys
 import logging
 
 from PyQt5 import QtWidgets, QtGui, uic
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
+from PyQt5.QtCore import pyqtSignal, Qt, QThread
 from socket import socket, AF_INET, SOCK_STREAM
 
 from client.chat_client import ChatClient
 from libchat.chat_config import *
 from libchat.log_config import log
 from libchat import utils
-
-UNREAD_COLOR = '#fdc086'
 
 
 class GetMessagesThread(QThread):
@@ -114,6 +112,12 @@ class MyWindow(QtWidgets.QMainWindow):
             for item in contacts:
                 # first item should be 2 for skipping first item in contacts_current_item_changed function
                 self.chats[item] = [(2, 0, '')]
+        # set current item in contacts list
+        items = self.listWidgetContacts.findItems(contacts[0], Qt.MatchExactly)
+        if len(items) > 0:
+            for item in items:
+                self.listWidgetContacts.setCurrentItem(item)
+                break
 
     def on_button_send_clicked(self):
         message_text = self.lineEditMessage.displayText()
