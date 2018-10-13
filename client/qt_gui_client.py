@@ -1,9 +1,9 @@
 import sys
 import logging
 
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets, QtGui, uic
+from PyQt5.QtCore import pyqtSignal, Qt, QThread
 from socket import socket, AF_INET, SOCK_STREAM
-from threading import Thread
 
 from client.chat_client import ChatClient
 from libchat.chat_config import *
@@ -11,10 +11,14 @@ from libchat.log_config import log
 from libchat import utils
 
 
-class GetMessagesThread(Thread):
+class GetMessagesThread(QThread):
+    # signal for working with thread in PyQt
+    message_received = pyqtSignal(str)
+
     def __init__(self, chat_client):
-        super().__init__()
-        self.daemon = False # False by default
+        QThread.__init__(self)
+        # super().__init__()
+        self.daemon = False  # False by default
         self.chat_client = chat_client
         self.is_close = False
 
@@ -43,6 +47,9 @@ class GetMessagesThread(Thread):
                 # if we have received message from current contact item
                 if user_from == window.listWidgetContacts.currentItem().text():
                     window.listWidgetMessages.addItem(str_time + ' ' + user_from + ' > ' + message)
+                else:
+                    self.message_received.emit(user_from)
+                    # window.highlight_contact(user_from)
             else:
                 window.chat_client.request_queue.put(jim_message)
                 window.chat_client.request_queue.task_done()
@@ -65,8 +72,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.setWindowTitle('Chat client: ' + user_name)
 
         self.sock = None
-        self.get_thread = None
         self.chat_client = None
+        self.get_thread = None
 
         self.chats = {}
         self.previous_contact_item = None
@@ -96,6 +103,8 @@ class MyWindow(QtWidgets.QMainWindow):
         # Create connection with server
         self.chat_client.connect(self.sock)
         self.get_thread = GetMessagesThread(self.chat_client)
+        # connect message_recieved signal with highlight_contact slot
+        self.get_thread.message_received.connect(self.highlight_contact)
         if self.chat_client.check_presence() is True and self.chat_client.authenticate(user_password) is True:
             self.get_thread.start()
             contacts = self.chat_client.get_contacts()
@@ -103,6 +112,12 @@ class MyWindow(QtWidgets.QMainWindow):
             for item in contacts:
                 # first item should be 2 for skipping first item in contacts_current_item_changed function
                 self.chats[item] = [(2, 0, '')]
+        # set current item in contacts list
+        items = self.listWidgetContacts.findItems(contacts[0], Qt.MatchExactly)
+        if len(items) > 0:
+            for item in items:
+                self.listWidgetContacts.setCurrentItem(item)
+                break
 
     def on_button_send_clicked(self):
         message_text = self.lineEditMessage.displayText()
@@ -155,8 +170,27 @@ class MyWindow(QtWidgets.QMainWindow):
                 if item[0] != 2:
                         self.listWidgetMessages.addItem(final_message)
                 logging.info(item)
+            normal_font = QtGui.QFont()
+            normal_font.setBold(False)
+            self.listWidgetContacts.currentItem().setFont(normal_font)
 
         self.previous_contact_item = user_to
+
+    def highlight_contact(self, user_from):
+        """
+        Finds item by name in contact list and highlights it.
+        Use this method for new messages.
+        :param user_from: Contact name
+        :return:
+        """
+        logging.info('change background in list')
+        items = self.listWidgetContacts.findItems(user_from, Qt.MatchExactly)
+        if len(items) > 0:
+            for item in items:
+                # item.setBackground(QtGui.QColor(UNREAD_COLOR))
+                bold_font = QtGui.QFont()
+                bold_font.setBold(True)
+                item.setFont(bold_font)
 
 
 if __name__ == '__main__':
