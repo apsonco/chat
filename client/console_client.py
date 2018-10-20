@@ -18,12 +18,13 @@ from threading import Thread
 from client.chat_client import ChatClient
 from libchat.chat_config import *
 from libchat.log_config import log
+from libchat import utils
 
 
 class GetMessagesThread(Thread):
     def __init__(self, chat_client):
         super().__init__()
-        self.daemon = False # False by default
+        self.daemon = False  # False by default
         self.chat_client = chat_client
         self.is_close = False
 
@@ -37,7 +38,9 @@ class GetMessagesThread(Thread):
                 if self.is_close is True:
                     break
             if KEY_ACTION in jim_message and jim_message[KEY_ACTION] == VALUE_MESSAGE:
-                print('{} {}: {}'.format(jim_message[KEY_TIME], jim_message[KEY_FROM], jim_message[KEY_MESSAGE]))
+                print('{} {}: {}'.format(utils.light_time(jim_message[KEY_TIME]),
+                                         jim_message[KEY_FROM],
+                                         jim_message[KEY_MESSAGE]))
             else:
                 self.chat_client.request_queue.put(jim_message)
                 self.chat_client.request_queue.task_done()
@@ -53,18 +56,29 @@ class GetMessagesThread(Thread):
 
 
 TEST_USER_NAME = 'My_first'
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout,
+                    level=logging.WARNING)
+
+
+def change_receiver():
+    return input('Enter receiver name: ')
 
 
 def echo_client():
-    # Should delete after checking
+    print('Hello. This is chat app. Please use next command:')
+    print('1. ch_receiver - for changing interlocutor name')
+    print('2. add_contact - for adding new existing contact to contact list')
+    print('3. get_contacts - for printing contact list')
+    print('4. del_contact - for deleting certain contact from contact list')
+    print('5. exit - for closing app')
+    print('Start your conversation:')
+
     user_name = input('Enter your nickname: ')
 
     # TODO: Rewrite - user must enter password
     user_password = 'king'
 
-    # TODO: Rewrite - user could use any user from contact list
-    user_friend = input('Enter your friend name: ')
+    user_friend = change_receiver()
 
     chat_client = ChatClient('localhost', 5335, user_name)
     # Create TCP socket
@@ -77,9 +91,11 @@ def echo_client():
         if chat_client.check_presence() is True and chat_client.authenticate(user_password) is True:
             get_thread.start()
             while True:
-                msg = input('Your message (exit, get_contacts, add_contact, del_contact): ')
+                msg = input()
                 if msg == 'exit':
                     break
+                elif msg == 'ch_receiver':
+                    user_friend = change_receiver()
                 elif msg == 'get_contacts':
                     print(chat_client.get_contacts())
                 elif msg == 'add_contact':
