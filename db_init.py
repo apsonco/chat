@@ -11,7 +11,8 @@ def create_tables():
     metadata = MetaData()
     clients_table = Table("clients", metadata,
                           Column("id", Integer, primary_key=True),
-                          Column("name", String(25), unique=True)
+                          Column("name", String(25), unique=True),
+                          Column("psw", String(25))
                           )
 
     contact_table = Table("contacts", metadata,

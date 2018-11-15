@@ -11,8 +11,9 @@
 # - port - server TCP port, 5335 by default
 
 import sys
-from socket import socket, AF_INET, SOCK_STREAM
+import getpass
 import logging
+from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
 
 from client.chat_client import ChatClient
@@ -57,7 +58,7 @@ class GetMessagesThread(Thread):
 
 TEST_USER_NAME = 'My_first'
 logging.basicConfig(stream=sys.stdout,
-                    level=logging.WARNING)
+                    level=logging.INFO)
 
 
 def change_receiver():
@@ -74,10 +75,7 @@ def echo_client():
     print('Start your conversation:')
 
     user_name = input('Enter your nickname: ')
-
-    # TODO: Rewrite - user must enter password
-    user_password = 'king'
-
+    user_password = input('Enter your password: ')
     user_friend = change_receiver()
 
     chat_client = ChatClient('localhost', 5335, user_name)

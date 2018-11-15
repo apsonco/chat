@@ -12,9 +12,11 @@ class Client(Base):
     __tablename__ = 'clients'
     id = Column(Integer, primary_key=True)
     name = Column(String(25), unique=True)
+    psw = Column(String(25))
 
-    def __init__(self, name):
+    def __init__(self, name, psw=''):
         self.name = name
+        self.psw = psw
 
 
 # Contacts table from libchat.config.DB_PATH DB

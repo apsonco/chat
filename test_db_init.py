@@ -13,6 +13,7 @@ import db_init
 
 GUEST = 'Guest'
 OWNER = 'Owner'
+PSW = 'test_password'
 TEST_MESSAGE = 'This is test message'
 Base = declarative_base()
 
@@ -35,7 +36,7 @@ class TestDb:
         # Class session creates new objects which bind with data base
         session = Session()
         # Need add User class object to session for storing it
-        guest_client = Client(GUEST)
+        guest_client = Client(GUEST, PSW)
 
         session.add(guest_client)
         session.commit()

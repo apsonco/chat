@@ -164,4 +164,18 @@ class ServerDbAdapter:
                 result = False
         return result
 
+    @log
+    def find_psw(self, user_name):
+        """
+        Find user in Clients table and see if password exist
+        :param user_name:
+        :return: Password hash if password exist, empty string - otherwise
+        """
+        result = ''
+        user_id = self.find_by_name(user_name)
+        if user_id != -1:
+            client = self.session.query(Client).filter(Client.id == user_id).first()
+            result = client.psw
+        return result
+
 

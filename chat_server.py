@@ -230,7 +230,8 @@ class ChatServer:
             # else:
             if requests[sock][KEY_ACTION] == VALUE_MESSAGE:
                 user_to = requests[sock][KEY_TO]
-                logging.info('I have message to {}'.format(user_to))
+                if __debug__:
+                    logging.info('I have message to {}'.format(user_to))
                 if user_to in self.clients_dict.keys():
                     try:
                         logging.info('Try to send message to {}'.format(user_to))
@@ -296,9 +297,15 @@ class ChatServer:
         if __debug__:
             logging.info('Authentication. Random message: {}'.format(random_message.decode))
 
-        # TODO: Change to retrieve user password from data base
-        secret_key = 'king'
-        pair = client_name + secret_key
+        # Check if password filed is empty ask client for password
+        db_adapter = ServerDbAdapter()
+        user_db_psw = db_adapter.find_psw(client_name)
+        if len(user_db_psw) == 0:
+            logging.info('Password for {} doesnt exist'.format(client_name))
+            # TODO: Ask client about password
+            pass
+
+        pair = client_name + user_db_psw
 
         # Do HMAC from message and secret key
         hash_code = hmac.new(pair.encode(CHARACTER_ENCODING), random_message)

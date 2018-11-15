@@ -42,10 +42,10 @@ class ChatClient:
     def get_socket(self):
         return self.sock
 
-    def authenticate(self, secret_key):
+    def authenticate(self, user_psw):
         """
         Authenticate user on server using password as a secret_key
-        :param secret_key:
+        :param user_psw:
         :return: True if server has user with such password or else otherwise
         """
         result = False
@@ -53,7 +53,7 @@ class ChatClient:
         if __debug__:
             logging.info('Authentication. Server random message {}'.format(message.decode))
 
-        pair = self.user_name + secret_key
+        pair = self.user_name + user_psw
         client_hash = hmac.new(pair.encode(CHARACTER_ENCODING), message)
         digest = client_hash.digest()
         self.sock.send(digest)
@@ -62,7 +62,7 @@ class ChatClient:
 
         response = self.sock.recv(2)
         if __debug__:
-            logging.info('Authentication. Server response {}'.format(response.decode))
+            logging.info('Authentication. Server response {}'.format(response))
 
         if response == b'Ok':
             result = True
